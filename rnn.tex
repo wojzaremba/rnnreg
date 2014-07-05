@@ -1,0 +1,84 @@
+
+% Use the following line  only  if you're still using LaTeX 2.09.
+%\documentstyle[icml2014,epsf,natbib]{article}
+% If you rely on Latex2e packages, like most moden people use this:
+\documentclass{article}
+
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+\usepackage{subfigure} 
+
+% For citations
+\usepackage{natbib}
+\usepackage{comment}
+
+% For algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% As of 2011, we use the hyperref package to produce hyperlinks in the
+% resulting PDF.  If this breaks your system, please commend out the
+% following usepackage line and replace \usepackage{icml2014} with
+% \usepackage[nohyperref]{icml2014} above.
+\usepackage{hyperref}
+
+% Packages hyperref and algorithmic misbehave sometimes.  We can fix
+% this with the following command.
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Employ the following version of the ``usepackage'' statement for
+% submitting the draft version of the paper for review.  This will set
+% the note in the first column to ``Under review.  Do not distribute.''
+%\usepackage{icml2014} 
+% Employ this version of the ``usepackage'' statement after the paper has
+% been accepted, when creating the final version.  This will set the
+% note in the first column to ``Proceedings of the...''
+\usepackage[accepted]{icml2014}
+
+
+
+\begin{document} 
+
+\twocolumn[
+\icmltitle{Recurrent neural network regularization}
+
+\icmlauthor{Wojciech Zaremba}{woj.zaremba@gmail.com}
+\icmladdress{New York University}
+\vskip -0.12in
+\icmladdress{Google}
+\icmlauthor{Ilya Sutskever}{ilyasu@google.com}
+\icmladdress{Google}
+
+\icmlkeywords{natual language processing, recurrent neural networks, language model}
+
+\vskip 0.3in
+]
+
+\begin{abstract} 
+  We present a simple regularization technique based on dropout for recurrent
+  neural networks (RNNs), which gives tremendous performance boost.
+  Thanks to it, we establish new state of the art results in language modeling.
+
+\end{abstract} 
+
+\section{Introduction}
+
+\section{Related work}
+
+\section{Long-short term memory units}
+
+\section{Intuition}
+
+\section{Experiments}
+
+
+\section{Discussion}
+
+\bibliography{bibliography}
+\bibliographystyle{icml2014}
+
+\end{document} 
+
