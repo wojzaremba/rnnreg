@@ -3,13 +3,16 @@
 %\documentstyle[icml2014,epsf,natbib]{article}
 % If you rely on Latex2e packages, like most moden people use this:
 \documentclass{article}
-
 % use Times
 \usepackage{times}
 % For figures
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
 \usepackage{subfigure} 
+\usepackage{python}
+\usepackage{footnote}
+\usepackage{tablefootnote}
+
 
 % For citations
 \usepackage{natbib}
@@ -18,12 +21,15 @@
 % For algorithms
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{amsmath}
+
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
 % resulting PDF.  If this breaks your system, please commend out the
 % following usepackage line and replace \usepackage{icml2014} with
 % \usepackage[nohyperref]{icml2014} above.
 \usepackage{hyperref}
+\usepackage{epic,eepic}
 
 % Packages hyperref and algorithmic misbehave sometimes.  We can fix
 % this with the following command.
@@ -49,31 +55,174 @@
 \icmladdress{New York University}
 \vskip -0.12in
 \icmladdress{Google}
+\vskip -0.08in
 \icmlauthor{Ilya Sutskever}{ilyasu@google.com}
 \icmladdress{Google}
+\vskip -0.08in
+\icmlauthor{Oriol Vinyals}{vinyals@google.com}
+\icmladdress{Google}
 
-\icmlkeywords{natual language processing, recurrent neural networks, language model}
+
+\icmlkeywords{natual language processing, recurrent neural networks, language model, LSTMs, speech recognition, machine translation}
 
 \vskip 0.3in
 ]
 
 \begin{abstract} 
-  We present a simple regularization technique based on dropout for recurrent
-  neural networks (RNNs), which gives tremendous performance boost.
-  Thanks to it, we establish new state of the art results in language modeling.
+  We present a simple regularization technique of recurrent neural networks (RNNs)
+  with long short term memory (LSTM) units.
+  This technique is based on dropout and gives tremendous performance boost.
+  We show that it is beneficial in variety sequence modelling problems like
+  language modeling, speech recognition, and machine translation.
 
 \end{abstract} 
 
 \section{Introduction}
+Recurrent neural networks yields the state-of-the-art performance on many sequence modelling
+tasks like language modelling, and speech recognition. Moreover, recent results in machine translation \cite{cho2014learning} shows their potential use in this field as well.
+
+
+
+%Model averaging gives significant improvement in various natural language processing tasks \cite{mikolov2012statistical}. This can be explained in two ways. Various
+%models capture various aspects of language modeling, or models were not properly regularized. 
+%We show that with a single model regularized RNN, we are able to achieve better results than state-of-the-art from averaging multiple models.
 
 \section{Related work}
 
 \section{Long-short term memory units}
 
+\section{Regularization with dropout}
+
+\begin{figure}
+  \begin{center}
+    \begin{picture}(150, 200)
+      \multiput(0,0)(35, 0){6}{
+        \put(-25, 45){\vector(1, 0){25}}
+        \put(-25, 100){\vector(1, 0){25}}
+      }
+      \multiput(0,0)(35, 0){5}{
+        \put(0, 0){
+          \put(0, 85){\framebox(10, 30){}}
+          \put(0, 30){\framebox(10, 30){}}
+          \multiput(0,0)(0, 5){4}{
+            \put(5, 7){\line(0, 0){2}}
+            \put(5, 60){\line(0, 0){2}}
+            \put(5, 115){\line(0, 0){2}}
+          }
+          \put(5, 30){\vector(0, 0){0.1}}
+          \put(5, 85){\vector(0, 0){0.1}}
+          \put(5, 138){\vector(0, 0){0.1}}
+        }
+      }
+      \put(-2, 0){\makebox{$x_{i-2}$}}
+      \put(33, 0){\makebox{$x_{i-1}$}}
+      \put(71, 0){\makebox{$x_{i}$}}
+      \put(103, 0){\makebox{$x_{i+1}$}}
+      \put(138, 0){\makebox{$x_{i+2}$}}
+      \put(-2, 142){\makebox{$y_{i-2}$}}
+      \put(33, 142){\makebox{$y_{i-1}$}}
+      \put(71, 142){\makebox{$y_{i}$}}
+      \put(103, 142){\makebox{$y_{i+1}$}}
+      \put(138, 142){\makebox{$y_{i+2}$}}
+    \end{picture}
+  \end{center}
+  \caption{Regularized multilayer RNN. Dashed arrows indicate connections with applied dropout, while
+  solid lines indicate connections where dropout is not applied.}
+\end{figure}
+
+
+\begin{figure}
+\begin{align*}
+&\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
+  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
+  L\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
+&c^l_k = f \odot c^l_{k-1} + i \odot g\\
+&h^l_k = o \odot \tanh(c_k)\\
+\end{align*}
+\caption{To describe dynamics of multilayer LSTM with dropout, we use multi-indexing. Lower indices correspond to dynamics over time, and upper indices correspond to dynamics over layers. For simplicity, we denote by $L$ a linear transform with bias ($Wx + b$), and by $D$ a dropout layer. $\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).}
+\end{figure}
+
+
 \section{Intuition}
+
+
+\begin{figure}
+  \begin{center}
+    \begin{picture}(150, 200)
+      \multiput(0,0)(35, 0){6}{
+        \put(-25, 45){\vector(1, 0){25}}
+        \put(-25, 100){\vector(1, 0){25}}
+      }
+      \multiput(0,0)(35, 0){5}{
+        \put(0, 0){
+          \put(0, 85){\framebox(10, 30){}}
+          \put(0, 30){\framebox(10, 30){}}
+          \multiput(0,0)(0, 5){4}{
+            \put(5, 7){\line(0, 0){2}}
+            \put(5, 60){\line(0, 0){2}}
+            \put(5, 115){\line(0, 0){2}}
+          }
+          \put(5, 30){\vector(0, 0){0.1}}
+          \put(5, 85){\vector(0, 0){0.1}}
+          \put(5, 138){\vector(0, 0){0.1}}
+        }
+      }
+      \put(-2, 0){\makebox{$x_{i-2}$}}
+      \put(33, 0){\makebox{$x_{i-1}$}}
+      \put(71, 0){\makebox{$x_{i}$}}
+      \put(103, 0){\makebox{$x_{i+1}$}}
+      \put(138, 0){\makebox{$x_{i+2}$}}
+      \put(-2, 142){\makebox{$y_{i-2}$}}
+      \put(33, 142){\makebox{$y_{i-1}$}}
+      \put(71, 142){\makebox{$y_{i}$}}
+      \put(103, 142){\makebox{$y_{i+1}$}}
+      \put(138, 142){\makebox{$y_{i+2}$}}
+
+       
+      {\linethickness{0.6mm}
+        \put(5, 7){\line(0, 0){38}}
+        \put(4, 45){\line(1, 0){105}}
+        \put(110, 44){\line(0, 0){56}}
+        \put(109, 100){\line(1, 0){35}}
+        \put(145, 99){\line(0, 0){35}}
+      }
+    \end{picture}
+  \end{center}
+  \caption{Thick line indicates an exemplary information flow in RNN. Information flow line is crossed $L$ times, where $L$ is depth of network.}
+\end{figure}
+
 
 \section{Experiments}
 
+\subsection{Language modeling}
+
+
+\begin{table}[t]
+  \tiny
+  \centering
+  \begin{tabular}{lll}
+    \hline
+     Model & Validation set & Test set \\
+    \hline
+    \multicolumn{3}{c}{A single model} \\
+    \hline
+    Previous state-of-the-art \tablefootnote{\cite{pascanu2013construct}} & & 107.5 \\
+    Regularized RNN & {\bf 87} & {\bf 83} \\
+    \hline
+    \multicolumn{3}{c}{Model averaging} \\
+    Previous state-of-the-art \tablefootnote{\cite{mikolov2012statistical}} & 83.5\tablefootnote{Weight of individual models are tuned to minimize this score. This few parameters are fit on this validation set, which is not completely fair.} & 89.4 \\
+    2 regularized RNNs & & \\
+    5 regularized RNNs & & \\
+    10 regularized RNNs & & \\
+    \hline
+  \end{tabular}
+  \caption{Word-level perplexity on Penn-tree-bank dataset.}
+\end{table}
+
+
+\subsection{Machine translation}
+
+\subsection{Speech recognition}
 
 \section{Discussion}
 
