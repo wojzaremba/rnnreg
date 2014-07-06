@@ -12,6 +12,7 @@
 \usepackage{python}
 \usepackage{footnote}
 \usepackage{tablefootnote}
+\usepackage{amsfonts}
 
 
 % For citations
@@ -76,40 +77,99 @@
 \end{abstract} 
 
 \section{Introduction}
-Recurrent neural networks yields the state-of-the-art performance on many sequence modelling
+RNNs yields the state-of-the-art performance on many sequence modelling
 tasks like language modelling, and speech recognition. Moreover, recent results in 
 machine translation \cite{cho2014learning} shows their potential use in this field as well. 
 However, up today there was no good techniques to regularize them. 
 Various attempts to inject noise or mask some of activations (dropout) were 
-giving small improvement in compare to model averaging. This work presents
+giving just a small improvement \cite{graves2013generating}. This work presents
 how to augment LSTMs with dropout. Resulting models give a tremendous 
-improvement in various domains.
+improvement over the baseline.
+
+
 
 
 \section{Related work}
+There have been extensive work on using RNNs for sequence modelling
+\cite{mikolov2012statistical, sutskever2013training}. Moreover, there were
+considered various twists into common architecture, which 
+potentially can capture long term dependencies \cite{hochreiter1997long, graves2009novel, cho2014learning}. This work choses LSTM architecture, however it is likely that conclusions 
+presented here would extend to other models. 
 
-\cite{hochreiter1997long}
+
+
+We focus here on tasks, which were previously considered in RNN literature like (1)
+language modelling, (2) speech recognition, and (3) machine translation. 
+Language modelling is a classical task tackled by
+RNNs \cite{pascanu2013construct, mikolov2010recurrent, mikolov2011strategies}.
+Using RNNs for speech recognition was previously 
+considered by \cite{robinson1996use, graves2013speech}. Finally, machine translation
+is a novel task for which RNNs are used. Usually, they are used for language modelling, 
+re-ranking, or phrase modelling \cite{cho2014learning}.
 
 \section{Regularized RNN with LSTMs}
 
+We describe in this section how LSTMs work \ref{sec:lstm}. Next, 
+we show how to regularize them \ref{sec:reg}, and we give some intuitions
+why it works.
+
+
+We use upper indexing for layer number, lower indexing for a time step. 
+Our states are $n$ dimensional.
+$h^l_k \in \mathbb{R}^{n}$ is a hidden state in layer $l$ in step $k$. Moreover, for simplicity
+we denote by $T:\mathbb{R}^{n \times n} \rightarrow \mathbb{R}^{n}$ a 
+linear transform with bias ($Wx + b$).
+$\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, 
+and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).
+
+
 \subsection{Long-short term memory units}
+\label{sec:lstm}
 
+Dynamics of RNNs can be described in terms of transitions
+from previous hidden states to the hidden states in the next step. 
+That is the function 
+\begin{align*}
+  &\text{RNN} : h^{l-1}_k, h^l_{k-1} \rightarrow h^l_k
+\end{align*}
 
-\begin{figure}
+In case of classical RNNs this function is described as: 
+\begin{align*}
+  h^l_k = f(Th^{l-1}_k + Lh^l_{k-1})
+\end{align*}
+
+LSTM has more complicated dynamics in order to be able to 
+``memorize'' information for extended number of time steps. 
+Memory is stored in cell ($c^l_k \in \mathbb{R}^n$) units. LSTM performs following mapping.
+\begin{align*}
+\text{LSTM} : h^{l-1}_k, h^l_{k-1}, c^l_{k - 1} \rightarrow h^l_k, c^l_k
+\end{align*}
+
+This mapping is described by:
 \begin{align*}
 &\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
   \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
-  L\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
+  T\begin{pmatrix}h^{l - 1}_k\\h^l_{k-1}\end{pmatrix}\\
 &c^l_k = f \odot c^l_{k-1} + i \odot g\\
-&h^l_k = o \odot \tanh(c_k)\\
+&h^l_k = o \odot \tanh(c^l_k)\\
 \end{align*}
-\caption{To describe dynamics of multilayer LSTM with dropout, we use multi-indexing. Lower indices correspond to dynamics over time, and upper indices correspond to dynamics over layers. For simplicity, we denote by $L$ a linear transform with bias ($Wx + b$), and by $D$ a dropout layer. $\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).}
-\end{figure}
+Where $\sigma, \tanh$ are applied element-wise.
 
 
 
+\subsection{Regularization with dropout} 
+\label{sec:reg}
 
-\subsection{Regularization with dropout}
+
+
+\begin{align*}
+&\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
+  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
+  T\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
+&c^l_k = f \odot c^l_{k-1} + i \odot g\\
+&h^l_k = o \odot \tanh(c^l_k)\\
+\end{align*}
+
 
 \begin{figure}
   \begin{center}
@@ -148,19 +208,18 @@ improvement in various domains.
   solid lines indicate connections where dropout is not applied.}
 \end{figure}
 
-\subsection{Intuition}
-We will describe here justifications why putting dropout across recurrent layers helps,
-but within layers degrades performance. 
 
 
-Dropout removes part of information, and LSTMs has to become
-more robust while performing input-output mapping. Simultaneously we don't want to erase
+Dropout removes part of information, and units have to become
+more robust while performing intermediate input-intermediate output mapping. Simultaneously we don't want to erase
 entire information. Especially we would like to facilitate memory about event that happened
-long time ago. Figure \ref{fig:flow} shows flow of an exemplary information from the 
-event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is projected
-with dropout only $L$ times, and it is independent of how far in past event occurred. All
+long time ago. Figure \ref{fig:flow} shows a flow of an exemplary information from the 
+event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is influenced
+with dropout only $L + 1$ times, and it is independent of how far in past event occurred. All
 the previous regularization techniques were constraining recurrent connections, which 
-effectively exponentially fast ``blurred'' information about the past.
+effectively exponentially fast ``blurred'' information about the past. 
+
+
 
 
 
@@ -206,19 +265,29 @@ effectively exponentially fast ``blurred'' information about the past.
       }
     \end{picture}
   \end{center}
-  \caption{Thick line indicates an exemplary information flow in RNN. Information flow line is crossed $L$ times, where $L$ is depth of network.}
+  \caption{Thick line indicates an exemplary information flow in RNN. Information flow line is crossed $L + 1$ times, where $L$ is depth of network.}
   \label{fig:flow}
 \end{figure}
 
 
 \section{Experiments}
 
-\subsection{Language modeling}
+We present here results in various domains (1) language modeling \ref{sec:lang}, 
+(2) speech recognition \ref{sec:speech}, and (3) machine translation \ref{sec:trans}.
 
-Our model is a two layer LSTM network, with 650 units initialized to uniformly in
+\subsection{Language modeling}
+\label{sec:lang}
+
+We have conducted word-level prediction experiments on Penn tree bank (PTB) dataset. 
+This dataset consists of $929$k training examples, $73$k validation examples, 
+and $82$k test examples. It has $10$k words in vocabulary. 
+
+
+Our model is a two layer LSTM network, with 650 units initialized uniformly in
 $[-0.05, 0.05]$. We apply $50\%$ of dropout on non-recurrent connections. We train for
 $39$ epochs, starting with learning rate $1$, and after $6$ epochs we decrease it by $1.2$ 
-in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. 
+in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. We set mini-batch
+to $20$. Table \ref{tab:ptb} shows our results. 
 
 \begin{table}[t]
   \small
@@ -242,12 +311,14 @@ in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$.
     \hline
   \end{tabular}
   \caption{Word-level perplexity on Penn-tree-bank dataset.}
+  \label{tab:ptb}
 \end{table}
 
+\subsection{Speech recognition}
+\label{sec:speech}
 
 \subsection{Machine translation}
-
-\subsection{Speech recognition}
+\label{sec:trans}
 
 \section{Discussion}
 
