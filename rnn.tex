@@ -164,6 +164,11 @@ Where $\sigma, \tanh$ are applied element-wise.
 \label{sec:reg}
 
 
+Contribution of this paper is finding out that
+carefully placed dropout improves LSTMs tremendously. 
+It is enough to place it on non-recurrent connections \ref{fig:reg}.
+Following equation describes it in more mathematical way, 
+where $D$ is a dropout operator:
 
 \begin{align*}
 &\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
@@ -209,13 +214,14 @@ Where $\sigma, \tanh$ are applied element-wise.
   \end{center}
   \caption{Regularized multilayer RNN. Dashed arrows indicate connections with applied dropout, while
   solid lines indicate connections where dropout is not applied.}
+  \label{fig:reg}
 \end{figure}
 
 
 
 Dropout removes part of information, and units have to become
 more robust while performing intermediate input-intermediate output mapping. Simultaneously we don't want to erase
-entire information. Especially we would like to facilitate memory about event that happened
+entire information. Especially we would like to facilitate memory about events that happened
 long time ago. Figure \ref{fig:flow} shows a flow of an exemplary information from the 
 event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is influenced
 with dropout only $L + 1$ times, and it is independent of how far in past event occurred. All
