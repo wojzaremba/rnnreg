@@ -52,9 +52,7 @@
 \icmltitle{Recurrent neural network regularization}
 
 \icmlauthor{Wojciech Zaremba}{woj.zaremba@gmail.com}
-\icmladdress{New York University}
-\vskip -0.12in
-\icmladdress{Google}
+\icmladdress{Google \& New York University}
 \vskip -0.08in
 \icmlauthor{Ilya Sutskever}{ilyasu@google.com}
 \icmladdress{Google}
@@ -79,19 +77,39 @@
 
 \section{Introduction}
 Recurrent neural networks yields the state-of-the-art performance on many sequence modelling
-tasks like language modelling, and speech recognition. Moreover, recent results in machine translation \cite{cho2014learning} shows their potential use in this field as well.
+tasks like language modelling, and speech recognition. Moreover, recent results in 
+machine translation \cite{cho2014learning} shows their potential use in this field as well. 
+However, up today there was no good techniques to regularize them. 
+Various attempts to inject noise or mask some of activations (dropout) were 
+giving small improvement in compare to model averaging. This work presents
+how to augment LSTMs with dropout. Resulting models give a tremendous 
+improvement in various domains.
 
-
-
-%Model averaging gives significant improvement in various natural language processing tasks \cite{mikolov2012statistical}. This can be explained in two ways. Various
-%models capture various aspects of language modeling, or models were not properly regularized. 
-%We show that with a single model regularized RNN, we are able to achieve better results than state-of-the-art from averaging multiple models.
 
 \section{Related work}
 
-\section{Long-short term memory units}
+\cite{hochreiter1997long}
 
-\section{Regularization with dropout}
+\section{Regularized RNN with LSTMs}
+
+\subsection{Long-short term memory units}
+
+
+\begin{figure}
+\begin{align*}
+&\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
+  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
+  L\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
+&c^l_k = f \odot c^l_{k-1} + i \odot g\\
+&h^l_k = o \odot \tanh(c_k)\\
+\end{align*}
+\caption{To describe dynamics of multilayer LSTM with dropout, we use multi-indexing. Lower indices correspond to dynamics over time, and upper indices correspond to dynamics over layers. For simplicity, we denote by $L$ a linear transform with bias ($Wx + b$), and by $D$ a dropout layer. $\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).}
+\end{figure}
+
+
+
+
+\subsection{Regularization with dropout}
 
 \begin{figure}
   \begin{center}
@@ -130,20 +148,15 @@ tasks like language modelling, and speech recognition. Moreover, recent results 
   solid lines indicate connections where dropout is not applied.}
 \end{figure}
 
-
-\begin{figure}
-\begin{align*}
-&\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
-  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
-  L\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
-&c^l_k = f \odot c^l_{k-1} + i \odot g\\
-&h^l_k = o \odot \tanh(c_k)\\
-\end{align*}
-\caption{To describe dynamics of multilayer LSTM with dropout, we use multi-indexing. Lower indices correspond to dynamics over time, and upper indices correspond to dynamics over layers. For simplicity, we denote by $L$ a linear transform with bias ($Wx + b$), and by $D$ a dropout layer. $\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).}
-\end{figure}
+\subsection{Intuition}
+We will describe here two justifications why putting dropout across recurrent layers helps,
+but within layers degradate performance. 
 
 
-\section{Intuition}
+Dropout removes part of information, and target function approximator has to become
+more robust while performing input-output mapping. Simultaneously we don't want to erase
+entire information. 
+
 
 
 \begin{figure}
@@ -189,6 +202,7 @@ tasks like language modelling, and speech recognition. Moreover, recent results 
     \end{picture}
   \end{center}
   \caption{Thick line indicates an exemplary information flow in RNN. Information flow line is crossed $L$ times, where $L$ is depth of network.}
+  \label{fig:dropout}
 \end{figure}
 
 
@@ -196,10 +210,15 @@ tasks like language modelling, and speech recognition. Moreover, recent results 
 
 \subsection{Language modeling}
 
+Our model is a two layer LSTM network, with 650 units initialized to uniformly in
+$[-0.05, 0.05]$. We apply $50\%$ of dropout on non-recurrent connections. We train for
+$39$ epochs, starting with learning rate $1$, and after $6$ epochs we descrese it by $1.2$ 
+in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. 
 
 \begin{table}[t]
-  \tiny
+  \small
   \centering
+  \renewcommand{\arraystretch}{1.15}
   \begin{tabular}{lll}
     \hline
      Model & Validation set & Test set \\
@@ -207,13 +226,14 @@ tasks like language modelling, and speech recognition. Moreover, recent results 
     \multicolumn{3}{c}{A single model} \\
     \hline
     Previous state-of-the-art \tablefootnote{\cite{pascanu2013construct}} & & 107.5 \\
-    Regularized RNN & {\bf 87} & {\bf 83} \\
+    Regularized LSTM & {\bf 87} & {\bf 83} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
+    \hline
     Previous state-of-the-art \tablefootnote{\cite{mikolov2012statistical}} & 83.5\tablefootnote{Weight of individual models are tuned to minimize this score. This few parameters are fit on this validation set, which is not completely fair.} & 89.4 \\
-    2 regularized RNNs & & \\
-    5 regularized RNNs & & \\
-    10 regularized RNNs & & \\
+    2 regularized LSTMs & & \\
+    5 regularized LSTMs & & \\
+    10 regularized LSTMs & & \\
     \hline
   \end{tabular}
   \caption{Word-level perplexity on Penn-tree-bank dataset.}

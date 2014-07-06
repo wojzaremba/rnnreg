@@ -1,0 +1,9 @@
+*.bbl
+*.blg
+*.log
+*.aux
+*.out
+*.*~
+*.swp
+.DS_Store
+img/.DS_Store
