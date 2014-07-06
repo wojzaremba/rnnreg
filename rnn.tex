@@ -149,13 +149,18 @@ improvement in various domains.
 \end{figure}
 
 \subsection{Intuition}
-We will describe here two justifications why putting dropout across recurrent layers helps,
-but within layers degradate performance. 
+We will describe here justifications why putting dropout across recurrent layers helps,
+but within layers degrades performance. 
 
 
-Dropout removes part of information, and target function approximator has to become
+Dropout removes part of information, and LSTMs has to become
 more robust while performing input-output mapping. Simultaneously we don't want to erase
-entire information. 
+entire information. Especially we would like to facilitate memory about event that happened
+long time ago. Figure \ref{fig:flow} shows flow of an exemplary information from the 
+event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is projected
+with dropout only $L$ times, and it is independent of how far in past event occurred. All
+the previous regularization techniques were constraining recurrent connections, which 
+effectively exponentially fast ``blurred'' information about the past.
 
 
 
@@ -202,7 +207,7 @@ entire information.
     \end{picture}
   \end{center}
   \caption{Thick line indicates an exemplary information flow in RNN. Information flow line is crossed $L$ times, where $L$ is depth of network.}
-  \label{fig:dropout}
+  \label{fig:flow}
 \end{figure}
 
 
@@ -212,7 +217,7 @@ entire information.
 
 Our model is a two layer LSTM network, with 650 units initialized to uniformly in
 $[-0.05, 0.05]$. We apply $50\%$ of dropout on non-recurrent connections. We train for
-$39$ epochs, starting with learning rate $1$, and after $6$ epochs we descrese it by $1.2$ 
+$39$ epochs, starting with learning rate $1$, and after $6$ epochs we decrease it by $1.2$ 
 in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. 
 
 \begin{table}[t]
@@ -226,7 +231,7 @@ in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$.
     \multicolumn{3}{c}{A single model} \\
     \hline
     Previous state-of-the-art \tablefootnote{\cite{pascanu2013construct}} & & 107.5 \\
-    Regularized LSTM & {\bf 87} & {\bf 83} \\
+    Regularized LSTM & {\bf 86.8} & {\bf 82.7} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
