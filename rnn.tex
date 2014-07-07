@@ -9,15 +9,14 @@
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
 \usepackage{subfigure} 
-\usepackage{python}
 \usepackage{footnote}
-\usepackage{tablefootnote}
 \usepackage{amsfonts}
-
 
 % For citations
 \usepackage{natbib}
 \usepackage{comment}
+\usepackage{multirow}
+
 
 % For algorithms
 \usepackage{algorithm}
@@ -44,8 +43,6 @@
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
 \usepackage[accepted]{icml2014}
-
-
 
 \begin{document} 
 
@@ -308,15 +305,21 @@ to $20$. Table \ref{tab:ptb} shows our results.
     \hline
     \multicolumn{3}{c}{A single model} \\
     \hline
-    Previous state-of-the-art \tablefootnote{\cite{pascanu2013construct}} & & 107.5 \\
-    Regularized LSTM & {\bf 86.2} & {\bf 82.7} \\
+    Previous state-of-the-art & & \multirow{2}{*}{107.5} \\
+    \cite{pascanu2013construct} & & \\
+    Non-regularized LSTM & 120.7 & 114.5 \\
+    Regularized LSTM & 86.2 & {\bf 82.7} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
-    Previous state-of-the-art \tablefootnote{\cite{mikolov2012statistical}} & 83.5\tablefootnote{Weight of individual models are tuned to minimize this score. This few parameters are fit on this validation set, which is not completely fair.} & 89.4 \\
+    Previous state-of-the-art & \multirow{2}{*}{83.5} & \multirow{2}{*}{89.4} \\
+    \cite{mikolov2012statistical} & & \\
+    2 non-regularized LSTMs & 100.4 & 96.1 \\
+    5 non-regularized LSTMs & 87.9 & 84.1 \\
+    10 non-regularized LSTMs & 83.5 & 80.0 \\
     2 regularized LSTMs & 80.6 & 77.0 \\
     5 regularized LSTMs & 76.7 & 73.3 \\
-    10 regularized LSTMs & & \\
+    10 regularized LSTMs & 75.2 & {\bf 72.0} \\
     \hline
   \end{tabular}
   \caption{Word-level perplexity on Penn-tree-bank dataset.}

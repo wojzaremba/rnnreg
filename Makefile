@@ -13,7 +13,7 @@ rnn.pdf: $(PARTS) bibliography.bib
 	pdflatex -shell-escape rnn.tex
 
 clean:
-	rm -f rnn.log rnn.blg rnn.aux rnn.bbl rnn.pdf rnn.4tc rnn.xref rnn.tmp rnn.dvi rnn.bbl 
+	rm -f *.log *.blg *.aux *.bbl *.pdf *.4tc *.xref *.tmp *.dvi *.hd *.idx *.out *.toc *.drv *.ins
 	rm -rf ~*
 	rm -rf *.tmp
 	rm -rf *.4om
