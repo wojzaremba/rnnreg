@@ -23,13 +23,56 @@
 \usepackage{algorithmic}
 \usepackage{amsmath}
 
+\setlength{\abovedisplayskip}{0cm}
+\setlength{\belowdisplayskip}{0cm}
+
+\usepackage[compact]{titlesec}
+\titlespacing{\section}{0pt}{0.5ex}{0.3ex}
+\titlespacing{\subsection}{0pt}{0.2ex}{0ex}
+\titlespacing{\subsubsection}{0pt}{0.1ex}{0ex}
+
+\newcommand{\startcompact}[1]{\par\vspace{-0.75em}\begin{#1}%
+  \allowdisplaybreaks\ignorespaces}
+
+\newcommand{\stopcompact}[1]{\end{#1}\ignorespaces}
+
+\usepackage{paralist}
+
+\makeatletter
+\ifcase \@ptsize \relax% 10pt
+  \newcommand{\miniscule}{\@setfontsize\miniscule{4}{5}}% \tiny: 5/6
+\or% 11pt
+  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
+\or% 12pt
+  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
+\fi
+\makeatother
+
+\newcommand {\aplt} {\ {\raise-.5ex\hbox{$\buildrel<\over\sim$}}\ }
+
+\newcommand{\eqn}[1]{Eqn.~\ref{eqn:#1}}
+\newcommand{\fig}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\tab}[1]{Table~\ref{tab:#1}}
+\newcommand{\secc}[1]{Section~\ref{sec:#1}}
+\def\etal{{\textit{et~al.~}}}
+\newcommand{\BigO}[1]{\ensuremath{\operatorname{O}\left(#1\right)}}
+\usepackage[symbol*]{footmisc}
+
+\DefineFNsymbolsTM{myfnsymbols}{% def. from footmisc.sty "bringhurst" symbols
+  \textasteriskcentered *
+  \textdagger    \dagger
+  \textdaggerdbl \ddagger
+  \textsection   \mathsection
+  \textbardbl    \|%
+  \textparagraph \mathparagraph
+}%
+
 
 % As of 2011, we use the hyperref package to produce hyperlinks in the
 % resulting PDF.  If this breaks your system, please commend out the
 % following usepackage line and replace \usepackage{icml2014} with
 % \usepackage[nohyperref]{icml2014} above.
 \usepackage{hyperref}
-\usepackage{epic,eepic}
 
 % Packages hyperref and algorithmic misbehave sometimes.  We can fix
 % this with the following command.
@@ -80,36 +123,45 @@
 RNNs yields the state-of-the-art performance on many sequence modelling
 tasks like language modelling, and speech recognition. Moreover, recent results in 
 machine translation \cite{cho2014learning} shows their potential use in this field as well. 
-However, up today there was no good techniques to regularize them. 
-Various attempts to inject noise or mask some of activations (dropout) were 
-giving just a small improvement \cite{graves2013generating}. This work presents
-how to augment LSTMs with dropout. Resulting models give a tremendous 
-improvement over the baseline.
-
-
-
+However, up today there is no good techniques to regularize them. As a result, people tend to use
+too small models, due to over-fitting by a large one.
+So far, various regularization attempts applied to RNNs give just a small improvements \cite{graves2013generating}. 
+This work presents
+how to augment LSTMs with dropout.
+Resulting models give a tremendous 
+improvement over the baseline in aforementioned tasks.
 
 \section{Related work}
-There have been extensive work on using RNNs for sequence modelling
+Tools, and tasks considered in this paper were broadly used before. Moreover, there is a great
+interest in understanding\cite{warde2013empirical, srivastava2013improving}, and extending dropout \cite{wang2013fast, wan2013regularization} 
+for feed forward networks. There was a little
+research so far in using dropout in recurrent network architectures. The only known for us paper in this area is
+\cite{bayer2013fast}. It focuses on using ``dropout marginalization'' (from \cite{wang2013fast}) instead of dropout
+, which has a smaller variance than dropout. They claim that dropout cannot be successfully used in RNNs due to
+large variance, which might cause divergence. We show that application of dropout on proper connections gives 
+viable, high-accuracy network.
+
+
+In terms of tools, there has been extensive work on using RNNs for sequence modelling
 \cite{mikolov2012statistical, sutskever2013training}. Moreover, there were
 considered various twists into common architecture, which 
-potentially can capture long term dependencies \cite{hochreiter1997long, graves2009novel, cho2014learning}. This work choses LSTM architecture, however it is likely that conclusions 
+potentially can capture long term dependencies \cite{hochreiter1997long, graves2009novel, cho2014learning}. 
+This work choses LSTM architecture, however it is possible that conclusions 
 presented here would extend to other models. 
-
 
 
 We focus here on tasks, which were previously considered in RNN literature like (1)
 language modelling, (2) speech recognition, and (3) machine translation. 
-Language modelling is a classical task tackled by
+Language modelling is a classical task addressed by
 RNNs \cite{pascanu2013construct, mikolov2010recurrent, mikolov2011strategies}.
 Using RNNs for speech recognition was previously 
 considered by \cite{robinson1996use, graves2013speech}. Finally, machine translation
 is a novel task for which RNNs are used. Usually, they are used for language modelling, 
 re-ranking, or phrase modelling \cite{cho2014learning}.
 
-\section{Regularized RNN with LSTMs}
+\section{Regularized RNN with LSTM cells}
 
-We describe in this section how LSTMs work \ref{sec:lstm}. Next, 
+We describe in this section how LSTM works \ref{sec:lstm}. Next, 
 we show how to regularize them \ref{sec:reg}, and we give some intuitions
 why it works.
 
@@ -135,25 +187,106 @@ That is the function
 
 In case of classical RNNs this function is described as: 
 \begin{align*}
-  h^l_k = f(Th^{l-1}_k + Th^l_{k-1})
+  h^l_k = f(Th^{l-1}_k + Th^l_{k-1}) \text{, where $f \in \{\sigma, \tanh\}$ }
 \end{align*}
 
 LSTM has more complicated dynamics in order to be able to 
 ``memorize'' information for extended number of time steps. 
-Memory is stored in cell ($c^l_k \in \mathbb{R}^n$) units. LSTM performs following mapping.
+Memory is stored in a cell ($c^l_k \in \mathbb{R}^n$) units. 
+There has been proposed various LSTM architectures, which differ in terms
+of applied activations functions, connections etc. However, the common
+goal is to have a ``memory cell'', which might store value for extended time.
+Network can decide to override this value, retrieve it, or keep it for a next time step.
+LSTM used in our experiments is described with following mapping.
 \begin{align*}
-\text{LSTM} : h^{l-1}_k, h^l_{k-1}, c^l_{k - 1} \rightarrow h^l_k, c^l_k
-\end{align*}
-
-This mapping is described by:
-\begin{align*}
+&\text{LSTM} : h^{l-1}_k, h^l_{k-1}, c^l_{k - 1} \rightarrow h^l_k, c^l_k\\
 &\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
   \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
   T\begin{pmatrix}h^{l - 1}_k\\h^l_{k-1}\end{pmatrix}\\
 &c^l_k = f \odot c^l_{k-1} + i \odot g\\
 &h^l_k = o \odot \tanh(c^l_k)\\
 \end{align*}
-Where $\sigma, \tanh$ are applied element-wise.
+Where $\sigma, \tanh$ are applied element-wise. Diagram \ref{fig:lstm} presents graphically
+LSTM equations.
+
+
+\begin{figure}
+  \begin{center}
+    \begin{picture}(200, 130)
+      \put(0, 0){\framebox(180, 100){}}
+      \put(90, 50){\circle{16}}
+      \put(86.5, 48){{\small $c_t$}}
+      \put(84, 60){{\scriptsize Cell}}
+
+      \put(90, 32){\circle{6.5}}
+      \put(87.25, 30.5){{\tiny $\times$}}
+
+      \put(90, 12){\circle{16}}
+      \put(86.5, 10){{\small $f$}}
+      \put(100, 10){{\scriptsize Forget gate}}
+
+      \put(90, 20){\vector(0, 0){8}}
+
+      \put(85, 44){\vector(2, 3){0}}
+      \qbezier(86, 32)(80, 36.5)(83, 41)
+
+      \qbezier(96, 34)(100, 36.5)(95.5, 43.5)
+      \put(93.5, 31.5){\vector(-1, -1){0}}
+      
+      \put(82, -8){\vector(1, 2){6}}
+      \put(72.5, -13){{\small $h_{k-1}^{l}$}}
+      \put(98, -8){\vector(-1, 2){6}}
+      \put(99, -13){{\small $h_{k}^{l-1}$}}
+
+      \put(30, 87){\circle{16}}
+      \put(28, 85){{\small $i$}}
+      \put(6, 85){{\scriptsize $\begin{matrix}\text{Input}\\\text{gate}\end{matrix}$}}
+
+      \put(21.5, 105){\vector(1, -2){5}}
+      \put(12.5, 108){{\small $h_{k-1}^{l}$}}
+      \put(39.5, 107){\vector(-1, -2){6}}
+      \put(37, 108){{\small $h_{k}^{l-1}$}}
+
+      \put(147, 87){\circle{16}}
+      \put(144.5, 85){{\small $o$}}
+      \put(156, 85){{\scriptsize $\begin{matrix}\text{Output}\\\text{gate}\end{matrix}$}}
+        
+      \put(138.5, 105){\vector(1, -2){5}}
+      \put(129.5, 108){{\small $h_{k-1}^{l}$}}
+      \put(156.5, 107){\vector(-1, -2){6}}
+      \put(154, 108){{\small $h_{k}^{l-1}$}}
+
+      \put(17, 50){\circle{16}}
+      \put(15, 48){{\small $g$}}
+      \put(1, 28){{\scriptsize $\begin{matrix}\text{Input}\\\text{modulation}\\\text{gate}\end{matrix}$}}
+
+      \put(53.5, 50){\circle{6.5}}
+      \put(50.75, 48.5){{\tiny $\times$}}
+
+      \put(57, 50){\vector(1, 0){25}}
+      \put(25, 50){\vector(1, 0){25}}
+      \put(35, 80){\vector(2, -3){17.5}}
+
+      \put(147, 50){\circle{6.5}}
+      \put(144.25, 48.5){{\tiny $\times$}}
+      \put(98, 50){\vector(1, 0){45.25}}
+      \put(150.5, 50){\vector(1, 0){38}}
+
+      \put(147, 79){\vector(0, -1){25.5}}
+      \put(190, 47){${\mathbf h^l_k}$}
+
+
+      \put(-20, 40){{\small $h_{k-1}^{l}$}}
+      \put(-20, 56){{\small $h_{k}^{l-1}$}}
+      \put(-10, 44){\vector(4, 1){19}}
+      \put(-10, 58){\vector(4, -1){19}}
+
+
+    \end{picture}
+  \end{center}
+  \caption{Graphical representation of LSTM memory cells used in this paper (there are minor differences in compare to \cite{graves2013generating}.}
+  \label{fig:lstm}
+\end{figure}
 
 
 
@@ -162,7 +295,7 @@ Where $\sigma, \tanh$ are applied element-wise.
 
 
 Contribution of this paper is finding out that
-carefully placed dropout improves LSTMs tremendously. 
+carefully placed dropout improves generalization of LSTMs tremendously. 
 It is enough to place it on non-recurrent connections \ref{fig:reg}.
 Following equation describes it in more mathematical way, 
 where $D$ is a dropout operator:
@@ -223,9 +356,7 @@ long time ago. Figure \ref{fig:flow} shows a flow of an exemplary information fr
 event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is influenced
 with dropout only $L + 1$ times, and it is independent of how far in past event occurred. All
 the previous regularization techniques were constraining recurrent connections, which 
-effectively exponentially fast ``blurred'' information about the past. 
-
-
+effectively exponentially fast ``blurs'' information about the past events. 
 
 
 
@@ -293,7 +424,7 @@ Our model is a two layer LSTM network, with 650 units initialized uniformly in
 $[-0.05, 0.05]$. We apply $50\%$ of dropout on non-recurrent connections. We train for
 $39$ epochs, starting with learning rate $1$, and after $6$ epochs we decrease it by $1.2$ 
 in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. We set mini-batch
-to $20$. Table \ref{tab:ptb} shows our results. 
+to $20$. Table \ref{tab:ptb} compares various models with our models. 
 
 \begin{table}[t]
   \small
@@ -305,15 +436,15 @@ to $20$. Table \ref{tab:ptb} shows our results.
     \hline
     \multicolumn{3}{c}{A single model} \\
     \hline
-    Previous state-of-the-art & & \multirow{2}{*}{107.5} \\
-    \cite{pascanu2013construct} & & \\
+    \cite{pascanu2013construct} & & 107.5 \\
+    \cite{chenglanguage} & & 100.0 \\
     Non-regularized LSTM & 120.7 & 114.5 \\
     Regularized LSTM & 86.2 & {\bf 82.7} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
-    Previous state-of-the-art & \multirow{2}{*}{83.5} & \multirow{2}{*}{89.4} \\
-    \cite{mikolov2012statistical} & & \\
+    \cite{mikolov2012statistical} & 83.5 & 89.4 \\
+    \cite{chenglanguage} & & 80.6 \\
     2 non-regularized LSTMs & 100.4 & 96.1 \\
     5 non-regularized LSTMs & 87.9 & 84.1 \\
     10 non-regularized LSTMs & 83.5 & 80.0 \\
@@ -333,6 +464,12 @@ to $20$. Table \ref{tab:ptb} shows our results.
 \label{sec:trans}
 
 \section{Discussion}
+We present amazing performance boosts with methods, which we 
+only intuitively understand. We think, that it crucial
+to derive our models analytically, rather than based only on
+intuition. However, so far this problems seem to be very difficult to
+tackle.
+
 
 \bibliography{bibliography}
 \bibliographystyle{icml2014}
