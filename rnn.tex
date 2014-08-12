@@ -111,103 +111,116 @@
 ]
 
 \begin{abstract} 
-  We present a simple regularization technique of recurrent neural networks (RNNs)
-  with long short term memory (LSTM) units.
-  This technique is based on dropout and gives tremendous performance boost.
-  We show that it is beneficial in variety sequence modelling problems like
-  language modeling, speech recognition, and machine translation.
-
+  We present a simple regularization technique for Recurrent Neural
+  Networks (RNNs) with Long Short-Term Memory (LSTM) units.  The
+  technique is based on dropout and gives a tremendous reduction in
+  overfitting.  We show that it is useful in a variety of sequence
+  modelling problems that include language modeling, speech recognition, and
+  machine translation.
 \end{abstract} 
 
 \section{Introduction}
-RNNs yields the state-of-the-art performance on many sequence modelling
-tasks like language modelling, and speech recognition. Moreover, recent results in 
-machine translation \cite{cho2014learning} shows their potential use in this field as well. 
-However, up today there is no good techniques to regularize them. As a result, people tend to use
-too small models, due to over-fitting by a large one.
-So far, various regularization attempts applied to RNNs give just a small improvements \cite{graves2013generating}. 
-This work presents
-how to augment LSTMs with dropout.
-Resulting models give a tremendous 
-improvement over the baseline in aforementioned tasks.
+
+RNNs yield the state of the art performance on many sequence modelling
+tasks, including language modelling \cite{mikolov}, speech recognition
+\cite{graves2013speech}, and machine translation \cite{SVL2014}.
+However, there have been no good ways of regularizing them. As a
+result, practical applications tend to use RNNs that are too small, as
+large RNNs would overfit.  To date, existing regularization methods
+give relatively small improvements on RNNs
+\cite{graves2013generating}.  Dropout is a highly effective way of
+regularizing feedforward neural networks
+\cite{srivastava2013improving} that had enjoyed considerable
+success. However, it is not clear how to use dropout on RNNs,
+because a naive application of dropout does not yield good results.
+In this work, we show how to correctly apply dropout to LSTMs, and
+demonstrate that this results in great reduction in overfitting.
 
 \section{Related work}
-Tools, and tasks considered in this paper were broadly used before. Moreover, there is a great
-interest in understanding\cite{warde2013empirical, srivastava2013improving}, and extending dropout \cite{wang2013fast, wan2013regularization} 
-for feed forward networks. There was a little
-research so far in using dropout in recurrent network architectures. The only known for us paper in this area is
-\cite{bayer2013fast}. It focuses on using ``dropout marginalization'' (from \cite{wang2013fast}) instead of dropout
-, which has a smaller variance than dropout. They claim that dropout cannot be successfully used in RNNs due to
-large variance, which might cause divergence. We show that application of dropout on proper connections gives 
-viable, high-accuracy network.
 
+Dropout \cite{srivastava2013improving} is a recently regularization
+method that has enjoyed a lot of success in applications of
+feedforward neural networks.  While there has been a lot of work
+extending Dropout \cite{wang2013fast, wan2013regularization}, there
+has been relatively little research so far in applying dropout to
+RNNs. The only paper on the topic is \cite{bayer2013fast} which
+focuses on ``marginalized dropout'' (from \cite{wang2013fast}) which
+is a noiseless deterministic approximation to conventional dropout.
+\cite{bayer2013fast} claims that conventional dropout cannot be
+successfully used in RNNs due to its large variance which hurts
+learning and causes poor convergence. In this work, we show that a
+specific application of dropout greatly reduces the overfitting of RNNs.
 
-In terms of tools, there has been extensive work on using RNNs for sequence modelling
-\cite{mikolov2012statistical, sutskever2013training}. Moreover, there were
-considered various twists into common architecture, which 
-potentially can capture long term dependencies \cite{hochreiter1997long, graves2009novel, cho2014learning}. 
-This work choses LSTM architecture, however it is possible that conclusions 
-presented here would extend to other models. 
+There has been extensive work on using RNNs for language modelling
+\cite{mikolov2012statistical, sutskever2013training}. Moreover, there
+have been a number of architectural variations on the RNN that are
+better suited for learning on data with long term dependencies
+\cite{hochreiter1997long, graves2009novel, cho2014learning,
+  leaky_neurons, clockwork_rnn}.  This work focuses on the LSTM which
+is the most widespread variant of the RNN, although it is likely that 
+our findings are valid for other models.
 
+In this paper, we focus on the following RNN tasks: language
+modelling, speech recognition, and machine translation.  Language
+modelling is the first task where RNNs achieved substantial success
+\cite{mikolov2010recurrent, mikolov2011strategies,
+  pascanu2013construct}.  RNNs have also been successfully used for
+speech recognition \cite{robinson1996use, graves2013speech} and have
+been applied to machine translation, where they are typically
+used for language modelling, re-ranking, or phrase modelling
+\cite{SVL2014,cho2014learning,bbn,other_neural_MT_papers}.
 
-We focus here on tasks, which were previously considered in RNN literature like (1)
-language modelling, (2) speech recognition, and (3) machine translation. 
-Language modelling is a classical task addressed by
-RNNs \cite{pascanu2013construct, mikolov2010recurrent, mikolov2011strategies}.
-Using RNNs for speech recognition was previously 
-considered by \cite{robinson1996use, graves2013speech}. Finally, machine translation
-is a novel task for which RNNs are used. Usually, they are used for language modelling, 
-re-ranking, or phrase modelling \cite{cho2014learning}.
+\section{Regularizing RNN with LSTM cells}
 
-\section{Regularized RNN with LSTM cells}
+In this section we describe the deep LSTM \ref{sec:lstm}. Next, 
+we show how to regularize them \ref{sec:reg}, and we provide an intuition
+for why our regularization scheme works.
 
-We describe in this section how LSTM works \ref{sec:lstm}. Next, 
-we show how to regularize them \ref{sec:reg}, and we give some intuitions
-why it works.
-
-
-We use upper indexing for layer number, lower indexing for a time step. 
-Our states are $n$ dimensional.
-$h^l_k \in \mathbb{R}^{n}$ is a hidden state in layer $l$ in step $k$. Moreover, for simplicity
-we denote by $T:\mathbb{R}^{n \times n} \rightarrow \mathbb{R}^{n}$ a 
-linear transform with bias ($Wx + b$).
-$\odot$ is a element-wise multiplication. $h^0_k$ is a input word-vector, 
-and $h^{L}_k$ is used to predict $y_k$ ($L$ is a number of layers).
-
+We use upperscript to denote a layer number and lowerscript to denote
+a timestep.  All our states are $n$-dimensional.  Let $h^l_k \in
+\mathbb{R}^{n}$ be a hidden state in layer $l$ in step $k$. Moreover,
+let $T_{n,m}:\mathbb{R}^{n} \rightarrow \mathbb{R}^{m}$ be a linear
+transform and with a bias ($Wx + b$ for some $W$ and $b$).  Let
+$\odot$ be a element-wise multiplication and let $h^0_k$ be an input
+word vector.  We use the activations $h^{L}_k$ to predict $y_k$, since
+$L$ is the number of layers in our deep LSTM.
 
 \subsection{Long-short term memory units}
 \label{sec:lstm}
 
-Dynamics of RNNs can be described in terms of transitions
+The RNNs dynamics can be described in terms of deterministic transitions
 from previous hidden states to the hidden states in the next step. 
-That is the function 
+The transition is a function
 \begin{align*}
   &\text{RNN} : h^{l-1}_k, h^l_{k-1} \rightarrow h^l_k
 \end{align*}
 
-In case of classical RNNs this function is described as: 
+For classical RNNs, this function is given by
 \begin{align*}
-  h^l_k = f(Th^{l-1}_k + Th^l_{k-1}) \text{, where $f \in \{\sigma, \tanh\}$ }
+  h^l_k = f(T_{n,n}h^{l-1}_k + T_{n,n}h^l_{k-1}) \text{, where $f \in \{\mathrm{sigm}, \tanh\}$ }
 \end{align*}
 
-LSTM has more complicated dynamics in order to be able to 
-``memorize'' information for extended number of time steps. 
-Memory is stored in a cell ($c^l_k \in \mathbb{R}^n$) units. 
-There has been proposed various LSTM architectures, which differ in terms
-of applied activations functions, connections etc. However, the common
-goal is to have a ``memory cell'', which might store value for extended time.
-Network can decide to override this value, retrieve it, or keep it for a next time step.
-LSTM used in our experiments is described with following mapping.
+The LSTM has relatively complicated dynamics that make it easy to
+``memorize'' information for extended number of time steps.  The
+``long term'' memory is stored in a vector of \emph{memory cells}
+$c^l_k \in \mathbb{R}^n$.  Although there are many LSTM architectures
+that differ in their connectivity sturcutre and activation functions,
+all LSTM architectures have explicit memory cells that make it easy to
+store information for extended periods of time.  The LSTM can decide
+to overwrite this information, retrieve it, or keep it for the next time
+step.  The LSTM architecture used in our experiments is given by the
+following equations \cite{graves2013speech}:
 \begin{align*}
 &\text{LSTM} : h^{l-1}_k, h^l_{k-1}, c^l_{k - 1} \rightarrow h^l_k, c^l_k\\
 &\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
-  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
-  T\begin{pmatrix}h^{l - 1}_k\\h^l_{k-1}\end{pmatrix}\\
+  \begin{pmatrix}\mathrm{sigm}\\\mathrm{sigm}\\\mathrm{sigm}\\\tanh\end{pmatrix}
+  T_{2n,4n}\begin{pmatrix}h^{l - 1}_k\\h^l_{k-1}\end{pmatrix}\\
 &c^l_k = f \odot c^l_{k-1} + i \odot g\\
 &h^l_k = o \odot \tanh(c^l_k)\\
 \end{align*}
-Where $\sigma, \tanh$ are applied element-wise. Diagram \ref{fig:lstm} presents graphically
-LSTM equations.
+In these equations, $\mathrm{sigm}$ and $\tanh$ are applied
+element-wise. Diagram \ref{fig:lstm} illustrates the LSTM
+equations.
 
 
 \begin{figure}
@@ -289,21 +302,20 @@ LSTM equations.
 \end{figure}
 
 
-
-\subsection{Regularization with dropout} 
+\subsection{Regularization with Dropout} 
 \label{sec:reg}
 
-
-Contribution of this paper is finding out that
-carefully placed dropout improves generalization of LSTMs tremendously. 
-It is enough to place it on non-recurrent connections \ref{fig:reg}.
-Following equation describes it in more mathematical way, 
-where $D$ is a dropout operator:
+The main contribution of this paper is the discovery that carefully
+placed dropout tremendously improves the generalization ability of LSTMs.
+To be effective, dropout must be placed on the non-recurrent connections
+\ref{fig:reg}.  The following equation describes it more precisely,
+where ${\bf D}$ is the dropout operator that sets a random subset of its 
+argument to zero:
 
 \begin{align*}
 &\begin{pmatrix}i\\f\\o\\g\end{pmatrix} =
-  \begin{pmatrix}\sigma\\\sigma\\\sigma\\\tanh\end{pmatrix}
-  T\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
+  \begin{pmatrix}\mathrm{sigm}\\\mathrm{sigm}\\\mathrm{sigm}\\\tanh\end{pmatrix}
+  T_{2n,4n}\begin{pmatrix}{\bf D}(h^{l - 1}_k)\\h^l_{k-1}\end{pmatrix}\\
 &c^l_k = f \odot c^l_{k-1} + i \odot g\\
 &h^l_k = o \odot \tanh(c^l_k)\\
 \end{align*}
@@ -347,17 +359,20 @@ where $D$ is a dropout operator:
   \label{fig:reg}
 \end{figure}
 
-
-
-Dropout removes part of information, and units have to become
-more robust while performing intermediate input-intermediate output mapping. Simultaneously we don't want to erase
-entire information. Especially we would like to facilitate memory about events that happened
-long time ago. Figure \ref{fig:flow} shows a flow of an exemplary information from the 
-event $x_{i-2}$ to the prediction in the step $i+2$. We can see that information is influenced
-with dropout only $L + 1$ times, and it is independent of how far in past event occurred. All
-the previous regularization techniques were constraining recurrent connections, which 
-effectively exponentially fast ``blurs'' information about the past events. 
-
+The dropout operator corrupts the information carried by the units,
+which forces them to perform their intermediate computations in a more
+robust manner. At the same time, we do not want to erase all of the
+information. We would especially like to remember events that occurred
+many timeseps in the past. Figure \ref{fig:flow} shows a possible flow
+of information from an event that occurred at $x_{i-2}$ to the
+prediction in the step $i+2$. We can see that the information is
+corrupted by dropout only $L + 1$ times, and it is independent of how
+far in past event occurred.  Previous regularization techniques would
+perturb the recurrent connections or the recurrent hidden state, which
+would greatly reduce the LSTM's memory capacity.  By not using dropout
+on the recurrent connections, the LSTM is able to get most of the benefit of dropout
+without sacrifising its valuable ability to learn and store information
+for long periods of time.
 
 
 \begin{figure}
@@ -409,22 +424,25 @@ effectively exponentially fast ``blurs'' information about the past events.
 
 \section{Experiments}
 
-We present here results in various domains (1) language modeling \ref{sec:lang}, 
-(2) speech recognition \ref{sec:speech}, and (3) machine translation \ref{sec:trans}.
+We present here results in there domains: language modeling \ref{sec:lang}, 
+speech recognition \ref{sec:speech}, and machine translation \ref{sec:trans}.
 
 \subsection{Language modeling}
 \label{sec:lang}
 
-We have conducted word-level prediction experiments on Penn tree bank (PTB) dataset. 
-This dataset consists of $929$k training examples, $73$k validation examples, 
-and $82$k test examples. It has $10$k words in vocabulary. 
+We have conducted word-level prediction experiments on Penn tree bank
+(PTB) dataset \cite{ptb_citation}.  This dataset consists of $929$k
+training words, $73$k validation words, and $82$k test words. It has
+$10$k words in vocabulary.
 
-
-Our model is a two layer LSTM network, with 650 units initialized uniformly in
-$[-0.05, 0.05]$. We apply $50\%$ of dropout on non-recurrent connections. We train for
-$39$ epochs, starting with learning rate $1$, and after $6$ epochs we decrease it by $1.2$ 
-in every epoch. We unroll RNN for $35$ steps, and clip gradients at $5$. We set mini-batch
-to $20$. Table \ref{tab:ptb} compares various models with our models. 
+Our model is a two-layer LSTM with 650 units {\bf [so 325 units per
+    layer?]} whoes parameters are initialized uniformly in $[-0.05,
+  0.05]$. We apply $50\%$ dropout on the non-recurrent connections. We
+train for $39$ epochs, starting with learning rate of $1$, and after
+$6$ epochs we decrease it by a factor of $1.2$ in every epoch. We
+unroll the RNN for $35$ steps, and clip the norm of the gradients
+(normalized by minibatch size) at $5$. We set mini-batch to
+$20$. Table \ref{tab:ptb} compares various models with our models.
 
 \begin{table}[t]
   \small
