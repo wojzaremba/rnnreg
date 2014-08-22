@@ -115,15 +115,15 @@
   Networks (RNNs) with Long Short-Term Memory (LSTM) units.  The
   technique is based on dropout and gives a tremendous reduction in
   overfitting.  We show that it is useful in a variety of sequence
-  modelling problems that include language modeling, speech recognition, and
+  modeling problems that include language modeling, speech recognition, and
   machine translation.
 \end{abstract} 
 
 \section{Introduction}
 
-RNNs yield the state of the art performance on many sequence modelling
-tasks, including language modelling \cite{mikolov}, speech recognition
-\cite{graves2013speech}, and machine translation \cite{SVL2014}.
+RNNs yield the state of the art performance on many sequence modeling
+tasks, including language modeling \cite{mikolov2012statistical}, speech recognition
+\cite{graves2013speech}, and machine translation \cite{SVL2014, cho2014learning}.
 However, there have been no good ways of regularizing them. As a
 result, practical applications tend to use RNNs that are too small, as
 large RNNs would overfit.  To date, existing regularization methods
@@ -140,7 +140,7 @@ demonstrate that this results in great reduction in overfitting.
 
 Dropout \cite{srivastava2013improving} is a recently regularization
 method that has enjoyed a lot of success in applications of
-feedforward neural networks.  While there has been a lot of work
+feed-forward neural networks.  While there has been a lot of work
 extending Dropout \cite{wang2013fast, wan2013regularization}, there
 has been relatively little research so far in applying dropout to
 RNNs. The only paper on the topic is \cite{bayer2013fast} which
@@ -151,24 +151,24 @@ successfully used in RNNs due to its large variance which hurts
 learning and causes poor convergence. In this work, we show that a
 specific application of dropout greatly reduces the overfitting of RNNs.
 
-There has been extensive work on using RNNs for language modelling
+There has been extensive work on using RNNs for language modeling
 \cite{mikolov2012statistical, sutskever2013training}. Moreover, there
 have been a number of architectural variations on the RNN that are
 better suited for learning on data with long term dependencies
 \cite{hochreiter1997long, graves2009novel, cho2014learning,
-  leaky_neurons, clockwork_rnn}.  This work focuses on the LSTM which
+  jaeger2007optimization, koutnik2014clockwork}.  This work focuses on the LSTM which
 is the most widespread variant of the RNN, although it is likely that 
 our findings are valid for other models.
 
 In this paper, we focus on the following RNN tasks: language
-modelling, speech recognition, and machine translation.  Language
-modelling is the first task where RNNs achieved substantial success
+modeling, speech recognition, and machine translation.  Language
+modeling is the first task where RNNs achieved substantial success
 \cite{mikolov2010recurrent, mikolov2011strategies,
   pascanu2013construct}.  RNNs have also been successfully used for
 speech recognition \cite{robinson1996use, graves2013speech} and have
 been applied to machine translation, where they are typically
-used for language modelling, re-ranking, or phrase modelling
-\cite{SVL2014,cho2014learning,bbn,other_neural_MT_papers}.
+used for language modeling, re-ranking, or phrase modeling
+\cite{SVL2014,cho2014learning,chow1987byblos,mikolov2013exploiting}.
 
 \section{Regularizing RNN with LSTM cells}
 
@@ -431,17 +431,32 @@ speech recognition \ref{sec:speech}, and machine translation \ref{sec:trans}.
 \label{sec:lang}
 
 We have conducted word-level prediction experiments on Penn tree bank
-(PTB) dataset \cite{ptb_citation}.  This dataset consists of $929$k
+(PTB) dataset \cite{marcus1993building}.  This dataset consists of $929$k
 training words, $73$k validation words, and $82$k test words. It has
-$10$k words in vocabulary.
+$10$k words in vocabulary. We have trained two regularized LSTMs model.
 
-Our model is a two-layer LSTM with 650 units {\bf [so 325 units per
-    layer?]} whoes parameters are initialized uniformly in $[-0.05,
+Both models are a two-layer LSTM unrolled for $35$ steps
+
+
+Medium size model has 650 units per layer
+whos parameters are initialized uniformly in $[-0.05,
   0.05]$. We apply $50\%$ dropout on the non-recurrent connections. We
 train for $39$ epochs, starting with learning rate of $1$, and after
 $6$ epochs we decrease it by a factor of $1.2$ in every epoch. We
-unroll the RNN for $35$ steps, and clip the norm of the gradients
-(normalized by minibatch size) at $5$. We set mini-batch to
+clip the norm of the gradients
+(normalized by minibatch size) at $5$. 
+
+
+Large size model has 1500 units per layer
+whos parameters are initialized uniformly in $[-0.04,
+  0.04]$. We apply $65\%$ dropout on the non-recurrent connections. We
+train for $55$ epochs, starting with learning rate of $1$, and after
+$14$ epochs we decrease it by a factor of $1.15$ in every epoch. We
+clip the norm of the gradients
+(normalized by minibatch size) at $10$. 
+
+
+We set mini-batch to
 $20$. Table \ref{tab:ptb} compares various models with our models.
 
 \begin{table}[t]
@@ -457,7 +472,8 @@ $20$. Table \ref{tab:ptb} compares various models with our models.
     \cite{pascanu2013construct} & & 107.5 \\
     \cite{chenglanguage} & & 100.0 \\
     Non-regularized LSTM & 120.7 & 114.5 \\
-    Regularized LSTM & 86.2 & {\bf 82.7} \\
+    Medium Regularized LSTM & 86.2 & 82.7 \\
+    Large Regularized LSTM & & {\bf aa} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
@@ -466,9 +482,12 @@ $20$. Table \ref{tab:ptb} compares various models with our models.
     2 non-regularized LSTMs & 100.4 & 96.1 \\
     5 non-regularized LSTMs & 87.9 & 84.1 \\
     10 non-regularized LSTMs & 83.5 & 80.0 \\
-    2 regularized LSTMs & 80.6 & 77.0 \\
-    5 regularized LSTMs & 76.7 & 73.3 \\
-    10 regularized LSTMs & 75.2 & {\bf 72.0} \\
+    2 medium regularized LSTMs & 80.6 & 77.0 \\
+    5 medium regularized LSTMs & 76.7 & 73.3 \\
+    10 medium regularized LSTMs & 75.2 & 72.0 \\
+    2 large regularized LSTMs & & \\
+    10 large regularized LSTMs & & \\
+    40 large regularized LSTMs & & {\bf aa} \\
     \hline
   \end{tabular}
   \caption{Word-level perplexity on Penn-tree-bank dataset.}
