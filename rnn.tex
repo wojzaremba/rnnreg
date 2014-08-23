@@ -123,7 +123,7 @@
 
 RNNs yield the state of the art performance on many sequence modeling
 tasks, including language modeling \cite{mikolov2012statistical}, speech recognition
-\cite{graves2013speech}, and machine translation \cite{SVL2014, cho2014learning}.
+\cite{graves2013speech}, and machine translation \cite{cho2014learning}.
 However, there have been no good ways of regularizing them. As a
 result, practical applications tend to use RNNs that are too small, as
 large RNNs would overfit.  To date, existing regularization methods
@@ -433,13 +433,12 @@ speech recognition \ref{sec:speech}, and machine translation \ref{sec:trans}.
 We have conducted word-level prediction experiments on Penn tree bank
 (PTB) dataset \cite{marcus1993building}.  This dataset consists of $929$k
 training words, $73$k validation words, and $82$k test words. It has
-$10$k words in vocabulary. We have trained two regularized LSTMs model.
-
-Both models are a two-layer LSTM unrolled for $35$ steps
+$10$k words in vocabulary. We have trained two various size regularized LSTMs model.
+Both models are a two-layer LSTM unrolled for $35$ steps. We set mini-batch to 20.
 
 
 Medium size model has 650 units per layer
-whos parameters are initialized uniformly in $[-0.05,
+whose parameters are initialized uniformly in $[-0.05,
   0.05]$. We apply $50\%$ dropout on the non-recurrent connections. We
 train for $39$ epochs, starting with learning rate of $1$, and after
 $6$ epochs we decrease it by a factor of $1.2$ in every epoch. We
@@ -448,7 +447,7 @@ clip the norm of the gradients
 
 
 Large size model has 1500 units per layer
-whos parameters are initialized uniformly in $[-0.04,
+whose parameters are initialized uniformly in $[-0.04,
   0.04]$. We apply $65\%$ dropout on the non-recurrent connections. We
 train for $55$ epochs, starting with learning rate of $1$, and after
 $14$ epochs we decrease it by a factor of $1.15$ in every epoch. We
@@ -456,8 +455,7 @@ clip the norm of the gradients
 (normalized by minibatch size) at $10$. 
 
 
-We set mini-batch to
-$20$. Table \ref{tab:ptb} compares various models with our models.
+Table \ref{tab:ptb} compares various models with our models.
 
 \begin{table}[t]
   \small
@@ -473,7 +471,7 @@ $20$. Table \ref{tab:ptb} compares various models with our models.
     \cite{chenglanguage} & & 100.0 \\
     Non-regularized LSTM & 120.7 & 114.5 \\
     Medium Regularized LSTM & 86.2 & 82.7 \\
-    Large Regularized LSTM & & {\bf aa} \\
+    Large Regularized LSTM & 82.2 & {\bf 78.4} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
@@ -485,9 +483,9 @@ $20$. Table \ref{tab:ptb} compares various models with our models.
     2 medium regularized LSTMs & 80.6 & 77.0 \\
     5 medium regularized LSTMs & 76.7 & 73.3 \\
     10 medium regularized LSTMs & 75.2 & 72.0 \\
-    2 large regularized LSTMs & & \\
-    10 large regularized LSTMs & & \\
-    40 large regularized LSTMs & & {\bf aa} \\
+    2 large regularized LSTMs & 76.9 & 73.6 \\
+    10 large regularized LSTMs & 72.8 & 69.5 \\
+    38 large regularized LSTMs & 71.9 & {\bf 68.7} \\
     \hline
   \end{tabular}
   \caption{Word-level perplexity on Penn-tree-bank dataset.}
@@ -499,6 +497,7 @@ $20$. Table \ref{tab:ptb} compares various models with our models.
 
 \subsection{Machine translation}
 \label{sec:trans}
+Will be updated with simultaneous publication featuring only machine translation.
 
 \section{Discussion}
 We present amazing performance boosts with methods, which we 
