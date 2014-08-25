@@ -436,41 +436,6 @@ training words, $73$k validation words, and $82$k test words. It has
 $10$k words in vocabulary. We have trained two various size regularized LSTMs model.
 Both models are a two-layer LSTM unrolled for $35$ steps. We set mini-batch to 20.
 
-
-Medium size model has 650 units per layer
-whose parameters are initialized uniformly in $[-0.05,
-  0.05]$. We apply $50\%$ dropout on the non-recurrent connections. We
-train for $39$ epochs, starting with learning rate of $1$, and after
-$6$ epochs we decrease it by a factor of $1.2$ in every epoch. We
-clip the norm of the gradients
-(normalized by minibatch size) at $5$. 
-
-
-Large size model has 1500 units per layer
-whose parameters are initialized uniformly in $[-0.04,
-  0.04]$. We apply $65\%$ dropout on the non-recurrent connections. We
-train for $55$ epochs, starting with learning rate of $1$, and after
-$14$ epochs we decrease it by a factor of $1.15$ in every epoch. We
-clip the norm of the gradients
-(normalized by minibatch size) at $10$. 
-
-
-Table \ref{tab:ptb} compares various models with our models, and figure \ref{fig:meaning}
-shows samples draw from a single large size regularized model.
-
-\begin{figure}
-
-\textit{the meaning of life is} that only if an end would be of the whole supplier. widespread rules are regarded as the companies of refuses to deliver. in balance of the nation 's information and loan growth associated with the carrier thrifts are in the process of slowing the seed and commercial paper.
-
-\line(1,0){235}
-
-\textit{the meaning of life is} nearly in the first several months before the government was addressing such a move as president and chief executive of the nation past from a national commitment to curb grounds. meanwhile the government invests overcapacity that criticism and in the outer reversal of small-town america.
-
-  \caption{Some interesting samples drawn from large regularized model conditioned on ``The meaning of life is''. We have removed ``unk'', ``N'', ``\$'' from possible outcomes.}
-
-  \label{fig:meaning}
-\end{figure}
-
 \begin{table}[t]
   \small
   \centering
@@ -506,8 +471,66 @@ shows samples draw from a single large size regularized model.
   \label{tab:ptb}
 \end{table}
 
+\begin{figure}
+\line(1,0){235}
+
+  {\footnotesize
+  \textit{the meaning of life is} that only if an end would be of the whole supplier. widespread rules are regarded as the companies of refuses to deliver. in balance of the nation 's information and loan growth associated with the carrier thrifts are in the process of slowing the seed and commercial paper.}
+\line(1,0){235}
+
+  {\footnotesize
+\textit{the meaning of life is} nearly in the first several months before the government was addressing such a move as president and chief executive of the nation past from a national commitment to curb grounds. meanwhile the government invests overcapacity that criticism and in the outer reversal of small-town america.}
+
+\line(1,0){235}
+  \caption{Some interesting samples drawn from large regularized model conditioned on ``The meaning of life is''. We have removed ``unk'', ``N'', ``\$'' from possible outcomes.}
+  \label{fig:meaning}
+\end{figure}
+
+
+
+Medium size model has 650 units per layer
+whose parameters are initialized uniformly in $[-0.05,
+  0.05]$. We apply $50\%$ dropout on the non-recurrent connections. We
+train for $39$ epochs, starting with learning rate of $1$, and after
+$6$ epochs we decrease it by a factor of $1.2$ in every epoch. We
+clip the norm of the gradients
+(normalized by minibatch size) at $5$. 
+
+
+Large size model has 1500 units per layer
+whose parameters are initialized uniformly in $[-0.04,
+  0.04]$. We apply $65\%$ dropout on the non-recurrent connections. We
+train for $55$ epochs, starting with learning rate of $1$, and after
+$14$ epochs we decrease it by a factor of $1.15$ in every epoch. We
+clip the norm of the gradients
+(normalized by minibatch size) at $10$. 
+
+
+Table \ref{tab:ptb} compares various models with our models, and figure \ref{fig:meaning}
+shows samples draw from a single large size regularized model.
+
+
 \subsection{Speech recognition}
 \label{sec:speech}
+
+Deep Neural Networks have been used for acoustic modeling for more than half a century (the reader is encouraged to read \cite{BourlardASR} for a good review). Acoustic modeling is a key component in mapping acoustic signals to sequences of words, as it models $p(s_t|X)$ where $s_t$ is the phonetic state at time t, and $X$ the acoustic observation. Recent work has shown that LSTMs are very powerful models for acoustic modeling \cite{sak2014speech}, to the point that much smaller networks (in number of parameters) are able to overfit the data more easily. The primary metric to measure acoustic models is frame accuracy, which is measured on each $s_t$ prediction for all $t$. Generally, this metric correlates with the actual metric of interest, the Word Error Rate (WER). However, since computing WER involves using a language model and tuning the decoding parameters for every change in the acoustic model, we decided to report frame accuracy. Table~\ref{tab:speech} clearly shows the positive effect of dropout by improving frame accuracy. Not surprisingly, training frame accuracy drops due to the noise added during training, but as is often the case with dropout, this yields models that generalize better to unseen data. Note that the testing set is easier than the training set, given its higher accuracy.
+
+\begin{table}[t]
+  \small
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lll}
+    \hline
+     Model & Training set & Validation set \\
+    \hline
+    Non-regularized LSTM & 71.6 & 68.9 \\
+    Regularized LSTM & 69.4 & {\bf 70.5} \\
+    \hline
+  \end{tabular}
+  \caption{Frame-level accuracy on Icelandic Speech Dataset.}
+  \label{tab:speech}
+\end{table}
+
 
 \subsection{Machine translation}
 \label{sec:trans}
