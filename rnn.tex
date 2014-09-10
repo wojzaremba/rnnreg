@@ -153,6 +153,15 @@ In this work, we show that this problem can be fixed by
 applying dropout to a certain subset of the RNNs' connections.  As a result, RNNs
 can now also benefit from dropout.
 
+
+Independently of our work \cite{pham2013dropout} developed very the same method
+of RNN regularization, and they demonstrate its application 
+in handwriting recognition. By the time of publishing of this paper, we were not aware
+of existence such publication. Our work rediscovers RNN regularization and shows
+very strong empirical results.
+
+
+
 There have been a number of architectural variants of the RNN that
 perform better on problems with long term dependencies
 \cite{hochreiter1997long, graves2009novel, cho2014learning,
@@ -468,7 +477,7 @@ The size of each minibatch is 20.
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
-    \citet{mikolov2012statistical} & 83.5 & 89.4 \\
+    \citet{mikolov2012statistical} & & 83.5 \\
     \citet{chenglanguage} & & 80.6 \\
     2 non-regularized LSTMs & 100.4 & 96.1 \\
     5 non-regularized LSTMs & 87.9 & 84.1 \\
