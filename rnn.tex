@@ -30,6 +30,14 @@
 \titlespacing{\subsection}{0pt}{0.2ex}{0ex}
 \titlespacing{\subsubsection}{0pt}{0.1ex}{0ex}
 
+\usepackage{float}
+
+\floatstyle{plain} % optionally change the style of the new float
+\newfloat{code}{H}{myc}
+
+\usepackage{iclr2015,times}
+\iclrconference
+
 \newcommand{\startcompact}[1]{\par\vspace{-0.75em}\begin{#1}%
   \allowdisplaybreaks\ignorespaces}
 
@@ -84,30 +92,45 @@
 % Employ this version of the ``usepackage'' statement after the paper has
 % been accepted, when creating the final version.  This will set the
 % note in the first column to ``Proceedings of the...''
-\usepackage[accepted]{icml2014}
+%\usepackage[accepted]{icml2014}
+
+\title{Recurrent Neural Network Regularization}
 
 \begin{document} 
 
-\twocolumn[
-\icmltitle{Recurrent Neural Network Regularization}
-
-\icmlauthor{Wojciech Zaremba}{woj.zaremba@gmail.com}
-\vskip -0.03in
-\icmladdress{Google \& New York University}
-\vskip -0.08in
-\icmlauthor{Ilya Sutskever}{ilyasu@google.com}
-\vskip -0.03in
-\icmladdress{Google}
-\vskip -0.08in
-\icmlauthor{Oriol Vinyals}{vinyals@google.com}
-\vskip -0.03in
-\icmladdress{Google}
+%\twocolumn[
 
 
-\icmlkeywords{Natural Language Processing, Recurrent Neural Networks, Language Model, LSTMs, Speech Recognition, Machine Translation}
+\author{
+Wojciech Zaremba \\
+New York University\\
+\texttt{woj.zaremba@gmail.com} \\
+\And
+Ilya Sutskever, Oriol Vinyals \\
+Google Brain \\
+\texttt{\{ilyasu,vinyals\}@google.com} \\
+}
 
-\vskip 0.3in
-]
+\maketitle
+
+
+%% \icmlauthor{Wojciech Zaremba}{woj.zaremba@gmail.com}
+%% \vskip -0.03in
+%% \icmladdress{Google \& New York University}
+%% \vskip -0.08in
+%% \icmlauthor{Ilya Sutskever}{ilyasu@google.com}
+%% \vskip -0.03in
+%% \icmladdress{Google}
+%% \vskip -0.08in
+%% \icmlauthor{Oriol Vinyals}{vinyals@google.com}
+%% \vskip -0.03in
+%% \icmladdress{Google}
+
+
+%% \icmlkeywords{Natural Language Processing, Recurrent Neural Networks, Language Model, LSTMs, Speech Recognition, Machine Translation}
+
+%% \vskip 0.3in
+%]
 
 \begin{abstract} 
   We present a simple regularization technique for Recurrent Neural
@@ -160,10 +183,9 @@ can now also benefit from dropout.
 %of existence such publication. Our work rediscovers RNN regularization and shows
 %very strong empirical results.
 
-
 Independently of our work, \cite{pham2013dropout} developed the very same RNN 
 regularization method and applied it to handwriting recognition.  We rediscovered
-this method and demonstrated strong empirical results over a wider range of problems. 
+this method and demonstrated strong empirical results over a wide range of problems. 
 Other work that applied dropout to LSTMs is \cite{pachitariu2013regularization}.
 
 There have been a number of architectural variants of the RNN that
@@ -600,7 +622,7 @@ We formulate a machine translation problem as a language modelling task, where
 an LSTM is trained to assign high probability to a correct
 translation of a source sentence.  Thus, the LSTM is trained on
 concatenations of source sentences and their translations 
-\cite{cho2014learning}. We compute a translation by 
+\cite{sutskever2014sequence} (see also \cite{cho2014learning}). We compute a translation by 
 approximating the most probable sequence of words
 using a simple beam search with a beam of size 12.  We ran an
 LSTM on the WMT'14 English to French dataset, on the
@@ -630,6 +652,43 @@ translation performance of the LSTM.
   \end{tabular}
   \caption{Results on the English to French translation task. }
   \label{tab:mt}
+\end{table}
+
+\subsection{Image Caption Generation}
+
+We applied the dropout variant 
+to the image caption generation model of \cite{vinyals2014show}.  The 
+image caption generation is similar to the sequence-to-sequence model
+of \cite{sutskever2014sequence}, but where the input image is mapped
+onto a vector with a highly-accurate pre-trained convolutional
+neural network \citep{szegedy2014going}, which is converted
+into a caption with a single-layer LSTM (see \citet{vinyals2014show}
+for the details on the architecture).  We test our dropout scheme on  
+LSTM as the convolutional neural network is not trained on the image caption
+dataset because it is not large (MSCOCO \citep{coco}). 
+
+Our results are summarized in the following Table \ref{tab:vis}.  In brief,
+dropout helps relative to not using dropout, but using an ensemble
+eliminates the gains attained by dropout.  Thus, in this setting,
+the main effect of dropout is to produce a single model that is as
+good as an ensemble, which is a reasonable improvement given
+the simplicity of the technique.  
+\begin{table}[t]
+  \small
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{lll}
+    \hline
+     Model & Test perplexity & Test BLEU score \\
+    \hline
+    Non-regularized model & 8.47 & 23.5 \\
+    Regularized model & 7.99 &  24.3 \\
+    \hline
+    10 non-regularized models  & 7.5  &  24.4 \\
+    \hline
+  \end{tabular}
+  \caption{Results on the English to French translation task. }
+  \label{tab:vis}
 \end{table}
 
 
