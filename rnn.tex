@@ -139,7 +139,7 @@ Google Brain \\
   not work well with RNNs and LSTMs.  In this paper, we show how to
   correctly apply dropout to LSTMs, and show that it
   substantially reduces overfitting on a variety of tasks. These tasks
-  include language modeling, speech recognition, and machine
+  include language modeling, speech recognition, image caption generation, and machine
   translation.
 \end{abstract} 
 
@@ -477,7 +477,8 @@ speech recognition (sec.~\ref{sec:speech}), and machine translation (sec.~\ref{s
 We conducted word-level prediction experiments on the Penn Tree Bank
 (PTB) dataset \cite{marcus1993building}, which consists of $929$k
 training words, $73$k validation words, and $82$k test words. It has
-$10$k words in its vocabulary. We trained regularized LSTMs of two
+$10$k words in its vocabulary. We downloaded it from Tomas Mikolov's webpage\footnote{\url{http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz}}.
+We trained regularized LSTMs of two
 sizes; these are denoted the medium LSTM and large LSTM.  Both LSTMs
 have two layers and are unrolled for $35$ steps. We initialize the
 hidden states to zero.  We then use the final hidden states of
@@ -525,16 +526,16 @@ The size of each minibatch is 20.
 \end{table}
 
 \begin{figure}
-\line(1,0){235}
+\line(1,0){400}
 
   {\footnotesize
   \textit{the meaning of life is} that only if an end would be of the whole supplier. widespread rules are regarded as the companies of refuses to deliver. in balance of the nation 's information and loan growth associated with the carrier thrifts are in the process of slowing the seed and commercial paper.}
-\line(1,0){235}
+\line(1,0){400}
 
   {\footnotesize
 \textit{the meaning of life is} nearly in the first several months before the government was addressing such a move as president and chief executive of the nation past from a national commitment to curb grounds. meanwhile the government invests overcapacity that criticism and in the outer reversal of small-town america.}
 
-\line(1,0){235}
+\line(1,0){400}
   \caption{Some interesting samples drawn from a large regularized model conditioned on ``The meaning of life is''. We have removed ``unk'', ``N'', ``\$'' from the set of permissible words.}
   \label{fig:meaning}
 \end{figure}
@@ -665,7 +666,7 @@ neural network \citep{szegedy2014going}, which is converted
 into a caption with a single-layer LSTM (see \citet{vinyals2014show}
 for the details on the architecture).  We test our dropout scheme on  
 LSTM as the convolutional neural network is not trained on the image caption
-dataset because it is not large (MSCOCO \citep{coco}). 
+dataset because it is not large (MSCOCO \citep{lin2014microsoft}). 
 
 Our results are summarized in the following Table \ref{tab:vis}.  In brief,
 dropout helps relative to not using dropout, but using an ensemble
