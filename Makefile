@@ -18,3 +18,6 @@ clean:
 	rm -rf *.tmp
 	rm -rf *.4om
 	rm -rf *~
+
+tar:
+	find . -type f | egrep -v '\.git|\.log|\.swp' | xargs tar zcvf ../rnn_reg.tar.gz
