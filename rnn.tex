@@ -143,6 +143,9 @@ RNNs \cite{graves2013generating}.
 In this work, we show that dropout, when correctly used,
 greatly reduces overfitting in LSTMs, and evaluate it on three different problems.
 
+
+The code for this work can be found in \url{https://github.com/wojzaremba/lstm}.
+
 \section{Related work}
 
 Dropout \cite{srivastava2013improving} is a recently introduced
@@ -192,15 +195,15 @@ used for language modeling, re-ranking, or phrase modeling
 
 \section{Regularizing RNNs with LSTM cells}
 
-In this section we describe the deep LSTM (sec.~\ref{sec:lstm}). Next, 
-we show how to regularize them (sec.~\ref{sec:reg}), and explain
+In this section we describe the deep LSTM (Section \ref{sec:lstm}). Next, 
+we show how to regularize them (Section \ref{sec:reg}), and explain
 why our regularization scheme works.
 
 We let subscripts denote timesteps and superscripts denote 
 layers.  All our states are $n$-dimensional.  Let $h^l_t
 \in \mathbb{R}^{n}$ be a hidden state in layer $l$ in timestep
 $t$. Moreover, let $T_{n,m}:\mathbb{R}^{n} \rightarrow \mathbb{R}^{m}$
-be a linear transform with a bias ($Wx + b$ for some $W$ and $b$).
+be an affine transform ($Wx + b$ for some $W$ and $b$).
 Let $\odot$ be element-wise multiplication and let $h^0_t$ be an
 input word vector at timestep $k$.  We use the activations $h^{L}_t$ to predict $y_t$,
 since $L$ is the number of layers in our deep LSTM.
@@ -331,7 +334,7 @@ equations.
 The main contribution of this paper is a recipe for applying 
 dropout to LSTMs in a way that successfully reduces overfitting.
 The main idea is to apply the dropout operator only to the non-recurrent connections
-(fig.~\ref{fig:reg}).  The following equation describes it more precisely,
+(Figure \ref{fig:reg}).  The following equation describes it more precisely,
 where ${\bf D}$ is the dropout operator that sets a random subset of
 its argument to zero:
 
@@ -451,8 +454,9 @@ memorization ability.
 
 \section{Experiments}
 
-We present results in three domains: language modeling (sec.~\ref{sec:lang}), 
-speech recognition (sec.~\ref{sec:speech}), and machine translation (sec.~\ref{sec:trans}).
+We present results in three domains: language modeling (Section \ref{sec:lang}), 
+speech recognition (Section \ref{sec:speech}), machine translation (Section \ref{sec:trans}),
+and image caption generation (Section \ref{sec:caption}).
 
 \subsection{Language modeling}
 \label{sec:lang}
@@ -639,6 +643,7 @@ translation performance of the LSTM.
 \end{table}
 
 \subsection{Image Caption Generation}
+\label{sec:caption}
 
 We applied the dropout variant 
 to the image caption generation model of \cite{vinyals2014show}.  The 
@@ -671,7 +676,7 @@ the simplicity of the technique.
     10 non-regularized models  & 7.5  &  24.4 \\
     \hline
   \end{tabular}
-  \caption{Results on the English to French translation task. }
+  \caption{Results on the image caption generation task. }
   \label{tab:vis}
 \end{table}
 
