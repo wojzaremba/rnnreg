@@ -1,10 +1,12 @@
-% Use the following line  only  if you're still using LaTeX 2.09.
-%\documentstyle[icml2014,epsf,natbib]{article}
-% If you rely on Latex2e packages, like most moden people use this:
-\documentclass{article}
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
 % use Times
 \usepackage{times}
- % For figures
+% For figures
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
 \usepackage{subfigure} 
@@ -22,84 +24,7 @@
 \usepackage{algorithmic}
 \usepackage{amsmath}
 
-\setlength{\abovedisplayskip}{0cm}
-\setlength{\belowdisplayskip}{0cm}
-
-\usepackage[compact]{titlesec}
-\titlespacing{\section}{0pt}{0.5ex}{0.3ex}
-\titlespacing{\subsection}{0pt}{0.2ex}{0ex}
-\titlespacing{\subsubsection}{0pt}{0.1ex}{0ex}
-
-\usepackage{float}
-
-\floatstyle{plain} % optionally change the style of the new float
-\newfloat{code}{H}{myc}
-
-\usepackage{iclr2015,times}
-\iclrconference
-
-\newcommand{\startcompact}[1]{\par\vspace{-0.75em}\begin{#1}%
-  \allowdisplaybreaks\ignorespaces}
-
-\newcommand{\stopcompact}[1]{\end{#1}\ignorespaces}
-
-\usepackage{paralist}
-
-\makeatletter
-\ifcase \@ptsize \relax% 10pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{4}{5}}% \tiny: 5/6
-\or% 11pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
-\or% 12pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
-\fi
-\makeatother
-
-\newcommand {\aplt} {\ {\raise-.5ex\hbox{$\buildrel<\over\sim$}}\ }
-
-\newcommand{\eqn}[1]{Eqn.~\ref{eqn:#1}}
-\newcommand{\fig}[1]{Fig.~\ref{fig:#1}}
-\newcommand{\tab}[1]{Table~\ref{tab:#1}}
-\newcommand{\secc}[1]{Section~\ref{sec:#1}}
-\def\etal{{\textit{et~al.~}}}
-\newcommand{\BigO}[1]{\ensuremath{\operatorname{O}\left(#1\right)}}
-\usepackage[symbol*]{footmisc}
-
-\DefineFNsymbolsTM{myfnsymbols}{% def. from footmisc.sty "bringhurst" symbols
-  \textasteriskcentered *
-  \textdagger    \dagger
-  \textdaggerdbl \ddagger
-  \textsection   \mathsection
-  \textbardbl    \|%
-  \textparagraph \mathparagraph
-}%
-
-
-% As of 2011, we use the hyperref package to produce hyperlinks in the
-% resulting PDF.  If this breaks your system, please commend out the
-% following usepackage line and replace \usepackage{icml2014} with
-% \usepackage[nohyperref]{icml2014} above.
-\usepackage{hyperref}
-
-% Packages hyperref and algorithmic misbehave sometimes.  We can fix
-% this with the following command.
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
-
-% Employ the following version of the ``usepackage'' statement for
-% submitting the draft version of the paper for review.  This will set
-% the note in the first column to ``Under review.  Do not distribute.''
-%\usepackage{icml2014} 
-% Employ this version of the ``usepackage'' statement after the paper has
-% been accepted, when creating the final version.  This will set the
-% note in the first column to ``Proceedings of the...''
-%\usepackage[accepted]{icml2014}
-
 \title{Recurrent Neural Network Regularization}
-
-\begin{document} 
-
-%\twocolumn[
-
 
 \author{
 Wojciech Zaremba\footnote{}\footnotetext{Work done while the author was in Google Brain.} \\
@@ -111,9 +36,26 @@ Google Brain \\
 \texttt{\{ilyasu,vinyals\}@google.com} \\
 }
 
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+
 \maketitle
 
-\begin{abstract} 
+\begin{abstract}
   We present a simple regularization technique for Recurrent Neural
   Networks (RNNs) with Long Short-Term Memory (LSTM) units.  Dropout,
   the most successful technique for regularizing neural networks, does
@@ -122,9 +64,9 @@ Google Brain \\
   substantially reduces overfitting on a variety of tasks. These tasks
   include language modeling, speech recognition, image caption generation, and machine
   translation.
-\end{abstract} 
+\end{abstract}
 
-{\textcolor{white} {\fontsize{0.001cm}{0.01em}\selectfont \footnotemark\footnotetext{Work done while the author was in Google Brain.} }}
+%{\textcolor{white} {\fontsize{0.001cm}{0.01em}\selectfont \footnotemark\footnotetext{Work done while the author was in Google Brain.} }}
 
 \section{Introduction}
 
@@ -144,7 +86,8 @@ In this work, we show that dropout, when correctly used,
 greatly reduces overfitting in LSTMs, and evaluate it on three different problems.
 
 
-The code for this work can be found in \url{https://github.com/wojzaremba/lstm}.
+The code for this work will be available by the time of the publication.
+%The code for this work can be found in \url{https://github.com/wojzaremba/lstm}.
 
 \section{Related work}
 
@@ -162,12 +105,6 @@ In this work, we show that this problem can be fixed by
 applying dropout to a certain subset of the RNNs' connections.  As a result, RNNs
 can now also benefit from dropout.
 
-
-%Independently of our work \cite{pham2013dropout} developed the very the same method
-%of RNN regularization, and they demonstrate its application 
-%in handwriting recognition. By the time of publishing of this paper, we were not aware
-%of existence such publication. Our work rediscovers RNN regularization and shows
-%very strong empirical results.
 
 Independently of our work, \cite{pham2013dropout} developed the very same RNN 
 regularization method and applied it to handwriting recognition.  We rediscovered
@@ -213,9 +150,6 @@ since $L$ is the number of layers in our deep LSTM.
 
 The RNN dynamics can be described using deterministic transitions
 from previous to current hidden states. 
-%In all following equations, the subscript $t$ denotes , 
-%while upper index $l$ represents stacked layers indexing.
-%Described in the previous paragraph.
 The deterministic state transition is a function
 \begin{align*}
   &\text{RNN} : h^{l-1}_t, h^l_{t-1} \rightarrow h^l_t
@@ -537,8 +471,8 @@ Training this network takes about half a day on an NVIDIA K20 GPU.
 
 The large LSTM has $1500$ units per layer and its parameters are
 initialized uniformly in $[-0.04, 0.04]$. We apply $65\%$ dropout on
-the non-recurrent connections. We train the model for $55$ epochs with
-a learning rate of $1$;  after $14$ epochs we start to reduce the learning rate by a
+the non-recurrent connections. We train the model for total $55$ epochs.
+We start with learning rate of $1$;  after $14$ epochs we start to reduce the learning rate by a
 factor of $1.15$ after each epoch. We clip the norm of
 the gradients (normalized by minibatch size) at $10$ \cite{mikolov2010recurrent}. Training this
 network takes an entire day on an NVIDIA K20 GPU.
@@ -696,7 +630,7 @@ We wish to acknowledge Tomas Mikolov for useful comments on the first version of
 
 \small
 \bibliography{bibliography}
-\bibliographystyle{icml2014}
+\bibliographystyle{plainnat}
 
-\end{document} 
 
+\end{document}
