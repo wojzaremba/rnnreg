@@ -1,10 +1,12 @@
-% Use the following line  only  if you're still using LaTeX 2.09.
-%\documentstyle[icml2014,epsf,natbib]{article}
-% If you rely on Latex2e packages, like most moden people use this:
-\documentclass{article}
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
 % use Times
 \usepackage{times}
- % For figures
+% For figures
 \usepackage{graphicx} % more modern
 %\usepackage{epsfig} % less modern
 \usepackage{subfigure} 
@@ -22,87 +24,10 @@
 \usepackage{algorithmic}
 \usepackage{amsmath}
 
-\setlength{\abovedisplayskip}{0cm}
-\setlength{\belowdisplayskip}{0cm}
-
-\usepackage[compact]{titlesec}
-\titlespacing{\section}{0pt}{0.5ex}{0.3ex}
-\titlespacing{\subsection}{0pt}{0.2ex}{0ex}
-\titlespacing{\subsubsection}{0pt}{0.1ex}{0ex}
-
-\usepackage{float}
-
-\floatstyle{plain} % optionally change the style of the new float
-\newfloat{code}{H}{myc}
-
-\usepackage{iclr2015,times}
-\iclrconference
-
-\newcommand{\startcompact}[1]{\par\vspace{-0.75em}\begin{#1}%
-  \allowdisplaybreaks\ignorespaces}
-
-\newcommand{\stopcompact}[1]{\end{#1}\ignorespaces}
-
-\usepackage{paralist}
-
-\makeatletter
-\ifcase \@ptsize \relax% 10pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{4}{5}}% \tiny: 5/6
-\or% 11pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
-\or% 12pt
-  \newcommand{\miniscule}{\@setfontsize\miniscule{5}{6}}% \tiny: 6/7
-\fi
-\makeatother
-
-\newcommand {\aplt} {\ {\raise-.5ex\hbox{$\buildrel<\over\sim$}}\ }
-
-\newcommand{\eqn}[1]{Eqn.~\ref{eqn:#1}}
-\newcommand{\fig}[1]{Fig.~\ref{fig:#1}}
-\newcommand{\tab}[1]{Table~\ref{tab:#1}}
-\newcommand{\secc}[1]{Section~\ref{sec:#1}}
-\def\etal{{\textit{et~al.~}}}
-\newcommand{\BigO}[1]{\ensuremath{\operatorname{O}\left(#1\right)}}
-\usepackage[symbol*]{footmisc}
-
-\DefineFNsymbolsTM{myfnsymbols}{% def. from footmisc.sty "bringhurst" symbols
-  \textasteriskcentered *
-  \textdagger    \dagger
-  \textdaggerdbl \ddagger
-  \textsection   \mathsection
-  \textbardbl    \|%
-  \textparagraph \mathparagraph
-}%
-
-
-% As of 2011, we use the hyperref package to produce hyperlinks in the
-% resulting PDF.  If this breaks your system, please commend out the
-% following usepackage line and replace \usepackage{icml2014} with
-% \usepackage[nohyperref]{icml2014} above.
-\usepackage{hyperref}
-
-% Packages hyperref and algorithmic misbehave sometimes.  We can fix
-% this with the following command.
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
-
-% Employ the following version of the ``usepackage'' statement for
-% submitting the draft version of the paper for review.  This will set
-% the note in the first column to ``Under review.  Do not distribute.''
-%\usepackage{icml2014} 
-% Employ this version of the ``usepackage'' statement after the paper has
-% been accepted, when creating the final version.  This will set the
-% note in the first column to ``Proceedings of the...''
-%\usepackage[accepted]{icml2014}
-
 \title{Recurrent Neural Network Regularization}
 
-\begin{document} 
-
-%\twocolumn[
-
-
 \author{
-Wojciech Zaremba \\
+Wojciech Zaremba\footnote{}\footnotetext{Work done while the author was in Google Brain.} \\
 New York University\\
 \texttt{woj.zaremba@gmail.com} \\
 \And
@@ -111,37 +36,37 @@ Google Brain \\
 \texttt{\{ilyasu,vinyals\}@google.com} \\
 }
 
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+
 \maketitle
 
-
-%% \icmlauthor{Wojciech Zaremba}{woj.zaremba@gmail.com}
-%% \vskip -0.03in
-%% \icmladdress{Google \& New York University}
-%% \vskip -0.08in
-%% \icmlauthor{Ilya Sutskever}{ilyasu@google.com}
-%% \vskip -0.03in
-%% \icmladdress{Google}
-%% \vskip -0.08in
-%% \icmlauthor{Oriol Vinyals}{vinyals@google.com}
-%% \vskip -0.03in
-%% \icmladdress{Google}
-
-
-%% \icmlkeywords{Natural Language Processing, Recurrent Neural Networks, Language Model, LSTMs, Speech Recognition, Machine Translation}
-
-%% \vskip 0.3in
-%]
-
-\begin{abstract} 
+\begin{abstract}
   We present a simple regularization technique for Recurrent Neural
   Networks (RNNs) with Long Short-Term Memory (LSTM) units.  Dropout,
   the most successful technique for regularizing neural networks, does
   not work well with RNNs and LSTMs.  In this paper, we show how to
   correctly apply dropout to LSTMs, and show that it
   substantially reduces overfitting on a variety of tasks. These tasks
-  include language modeling, speech recognition, machine
-  translation, and image caption generation.
-\end{abstract} 
+  include language modeling, speech recognition, image caption generation, and machine
+  translation.
+\end{abstract}
+
+%{\textcolor{white} {\fontsize{0.001cm}{0.01em}\selectfont \footnotemark\footnotetext{Work done while the author was in Google Brain.} }}
 
 \section{Introduction}
 
@@ -160,6 +85,10 @@ RNNs \cite{graves2013generating}.
 In this work, we show that dropout, when correctly used,
 greatly reduces overfitting in LSTMs, and evaluate it on three different problems.
 
+
+The code for this work will be available by the time of the publication.
+%The code for this work can be found in \url{https://github.com/wojzaremba/lstm}.
+
 \section{Related work}
 
 Dropout \cite{srivastava2013improving} is a recently introduced
@@ -167,26 +96,22 @@ regularization method that has been very successful with
 feed-forward neural networks.   While much work has extended dropout in  
 various ways \cite{wang2013fast,wan2013regularization}, there has
 been relatively little research in applying it to RNNs. The only
-paper on this topic is by \citet{bayer2013fast}, who focuses on
+paper on this topic is by Bayer et al.~\cite{bayer2013fast}, who focuses on
 ``marginalized dropout'' \cite{wang2013fast}, a
 noiseless deterministic approximation to standard dropout.
-\citet{bayer2013fast} claim that conventional dropout does not work well
+Bayer et al.~\cite{bayer2013fast} claim that conventional dropout does not work well
 with RNNs because the recurrence amplifies noise, which in turn hurts learning. 
 In this work, we show that this problem can be fixed by
 applying dropout to a certain subset of the RNNs' connections.  As a result, RNNs
 can now also benefit from dropout.
 
 
-%Independently of our work \cite{pham2013dropout} developed the very the same method
-%of RNN regularization, and they demonstrate its application 
-%in handwriting recognition. By the time of publishing of this paper, we were not aware
-%of existence such publication. Our work rediscovers RNN regularization and shows
-%very strong empirical results.
-
-Independently of our work, \cite{pham2013dropout} developed the very same RNN 
-regularization method and applied it to handwriting recognition.  We rediscovered
-this method and demonstrated strong empirical results over a wide range of problems. 
-Other work that applied dropout to LSTMs is \cite{pachitariu2013regularization}.
+Independently of our work, Pham et al.~\cite{pham2013dropout}
+developed the very same RNN regularization method and applied it to
+handwriting recognition.  We rediscovered this method and demonstrated
+strong empirical results over a wide range of problems.  Other work
+that applied dropout to LSTMs is Pachitariu and Sahani
+\cite{pachitariu2013regularization}.
 
 There have been a number of architectural variants of the RNN that
 perform better on problems with long term dependencies
@@ -209,15 +134,15 @@ used for language modeling, re-ranking, or phrase modeling
 
 \section{Regularizing RNNs with LSTM cells}
 
-In this section we describe the deep LSTM (sec.~\ref{sec:lstm}). Next, 
-we show how to regularize them (sec.~\ref{sec:reg}), and explain
+In this section we describe the deep LSTM (Section \ref{sec:lstm}). Next, 
+we show how to regularize them (Section \ref{sec:reg}), and explain
 why our regularization scheme works.
 
 We let subscripts denote timesteps and superscripts denote 
 layers.  All our states are $n$-dimensional.  Let $h^l_t
 \in \mathbb{R}^{n}$ be a hidden state in layer $l$ in timestep
 $t$. Moreover, let $T_{n,m}:\mathbb{R}^{n} \rightarrow \mathbb{R}^{m}$
-be a linear transform with a bias ($Wx + b$ for some $W$ and $b$).
+be an affine transform ($Wx + b$ for some $W$ and $b$).
 Let $\odot$ be element-wise multiplication and let $h^0_t$ be an
 input word vector at timestep $k$.  We use the activations $h^{L}_t$ to predict $y_t$,
 since $L$ is the number of layers in our deep LSTM.
@@ -227,9 +152,6 @@ since $L$ is the number of layers in our deep LSTM.
 
 The RNN dynamics can be described using deterministic transitions
 from previous to current hidden states. 
-%In all following equations, the subscript $t$ denotes , 
-%while upper index $l$ represents stacked layers indexing.
-%Described in the previous paragraph.
 The deterministic state transition is a function
 \begin{align*}
   &\text{RNN} : h^{l-1}_t, h^l_{t-1} \rightarrow h^l_t
@@ -337,7 +259,7 @@ equations.
 
     \end{picture}
   \end{center}
-  \caption{A graphical representation of LSTM memory cells used in this paper (there are minor differences in comparison to \citet{graves2013generating}).}
+  \caption{A graphical representation of LSTM memory cells used in this paper (there are minor differences in comparison to Graves \cite{graves2013generating}).}
   \label{fig:lstm}
 \end{figure}
 
@@ -348,7 +270,7 @@ equations.
 The main contribution of this paper is a recipe for applying 
 dropout to LSTMs in a way that successfully reduces overfitting.
 The main idea is to apply the dropout operator only to the non-recurrent connections
-(fig.~\ref{fig:reg}).  The following equation describes it more precisely,
+(Figure \ref{fig:reg}).  The following equation describes it more precisely,
 where ${\bf D}$ is the dropout operator that sets a random subset of
 its argument to zero:
 
@@ -468,8 +390,9 @@ memorization ability.
 
 \section{Experiments}
 
-We present results in three domains: language modeling (sec.~\ref{sec:lang}), 
-speech recognition (sec.~\ref{sec:speech}), and machine translation (sec.~\ref{sec:trans}).
+We present results in three domains: language modeling (Section \ref{sec:lang}), 
+speech recognition (Section \ref{sec:speech}), machine translation (Section \ref{sec:trans}),
+and image caption generation (Section \ref{sec:caption}).
 
 \subsection{Language modeling}
 \label{sec:lang}
@@ -477,7 +400,8 @@ speech recognition (sec.~\ref{sec:speech}), and machine translation (sec.~\ref{s
 We conducted word-level prediction experiments on the Penn Tree Bank
 (PTB) dataset \cite{marcus1993building}, which consists of $929$k
 training words, $73$k validation words, and $82$k test words. It has
-$10$k words in its vocabulary. We trained regularized LSTMs of two
+$10$k words in its vocabulary. We downloaded it from Tomas Mikolov's webpage\footnote{\url{http://www.fit.vutbr.cz/~imikolov/rnnlm/simple-examples.tgz}}.
+We trained regularized LSTMs of two
 sizes; these are denoted the medium LSTM and large LSTM.  Both LSTMs
 have two layers and are unrolled for $35$ steps. We initialize the
 hidden states to zero.  We then use the final hidden states of
@@ -495,16 +419,16 @@ The size of each minibatch is 20.
     \hline
     \multicolumn{3}{c}{A single model} \\
     \hline
-    \citet{pascanu2013construct} & & 107.5 \\
-    \citet{chenglanguage} & & 100.0 \\
+    Pascanu et al.~\cite{pascanu2013construct} & & 107.5 \\
+    Cheng et al.~\cite{chenglanguage} & & 100.0 \\
     non-regularized LSTM & 120.7 & 114.5 \\
     Medium regularized LSTM & 86.2 & 82.7 \\
     Large regularized LSTM & 82.2 & {\bf 78.4} \\
     \hline
     \multicolumn{3}{c}{Model averaging} \\
     \hline
-    \citet{mikolov2012statistical} & & 83.5 \\
-    \citet{chenglanguage} & & 80.6 \\
+    Mikolov \cite{mikolov2012statistical} & & 83.5 \\
+    Cheng et al.~\cite{chenglanguage} & & 80.6 \\
     2 non-regularized LSTMs & 100.4 & 96.1 \\
     5 non-regularized LSTMs & 87.9 & 84.1 \\
     10 non-regularized LSTMs & 83.5 & 80.0 \\
@@ -517,7 +441,7 @@ The size of each minibatch is 20.
     \hline
     \multicolumn{3}{c}{Model averaging with dynamic RNNs and n-gram models} \\
     \hline
-    \citet{mikolov2012context} & & 72.9 \\
+    Mikolov and Zweig \cite{mikolov2012context} & & 72.9 \\
     \hline
   \end{tabular}
   \caption{Word-level perplexity on the Penn Tree Bank dataset.}
@@ -525,16 +449,16 @@ The size of each minibatch is 20.
 \end{table}
 
 \begin{figure}
-\line(1,0){235}
+\line(1,0){400}
 
   {\footnotesize
   \textit{the meaning of life is} that only if an end would be of the whole supplier. widespread rules are regarded as the companies of refuses to deliver. in balance of the nation 's information and loan growth associated with the carrier thrifts are in the process of slowing the seed and commercial paper.}
-\line(1,0){235}
+\line(1,0){400}
 
   {\footnotesize
 \textit{the meaning of life is} nearly in the first several months before the government was addressing such a move as president and chief executive of the nation past from a national commitment to curb grounds. meanwhile the government invests overcapacity that criticism and in the outer reversal of small-town america.}
 
-\line(1,0){235}
+\line(1,0){400}
   \caption{Some interesting samples drawn from a large regularized model conditioned on ``The meaning of life is''. We have removed ``unk'', ``N'', ``\$'' from the set of permissible words.}
   \label{fig:meaning}
 \end{figure}
@@ -549,8 +473,8 @@ Training this network takes about half a day on an NVIDIA K20 GPU.
 
 The large LSTM has $1500$ units per layer and its parameters are
 initialized uniformly in $[-0.04, 0.04]$. We apply $65\%$ dropout on
-the non-recurrent connections. We train the model for $55$ epochs with
-a learning rate of $1$;  after $14$ epochs we start to reduce the learning rate by a
+the non-recurrent connections. We train the model for total $55$ epochs.
+We start with learning rate of $1$;  after $14$ epochs we start to reduce the learning rate by a
 factor of $1.15$ after each epoch. We clip the norm of
 the gradients (normalized by minibatch size) at $10$ \cite{mikolov2010recurrent}. Training this
 network takes an entire day on an NVIDIA K20 GPU.
@@ -575,7 +499,7 @@ regularized LSTM.
 \label{sec:speech}
 
 Deep Neural Networks have been used for acoustic modeling for over half a century (see
-\citet{BourlardASR} for a good review). Acoustic modeling is a key
+Bourlard and Morgan \cite{BourlardASR} for a good review). Acoustic modeling is a key
 component in mapping acoustic signals to sequences of words, as it
 models $p(s_t|X)$ where $s_t$ is the phonetic state at time $t$ and $X$
 is the acoustic observation. Recent work has shown that LSTMs can 
@@ -622,11 +546,11 @@ We formulate a machine translation problem as a language modelling task, where
 an LSTM is trained to assign high probability to a correct
 translation of a source sentence.  Thus, the LSTM is trained on
 concatenations of source sentences and their translations 
-\cite{sutskever2014sequence} (see also \cite{cho2014learning}). We compute a translation by 
+\cite{sutskever2014sequence} (see also Cho et al.~\cite{cho2014learning}). We compute a translation by 
 approximating the most probable sequence of words
 using a simple beam search with a beam of size 12.  We ran an
 LSTM on the WMT'14 English to French dataset, on the
-``selected'' subset from \citet{wmt_joint} which has 340M French words
+``selected'' subset from \cite{wmt_joint} which has 340M French words
 and 304M English words.  Our LSTM has 4 hidden layers, and both its
 layers and word embeddings have 1000 units.  Its 
 English vocabulary has 160,000 words and its French vocabulary has
@@ -655,25 +579,9 @@ translation performance of the LSTM.
 \end{table}
 
 \subsection{Image Caption Generation}
+\label{sec:caption}
 
-We applied the dropout variant 
-to the image caption generation model of \cite{vinyals2014show}.  The 
-image caption generation is similar to the sequence-to-sequence model
-of \cite{sutskever2014sequence}, but where the input image is mapped
-onto a vector with a highly-accurate pre-trained convolutional
-neural network \citep{szegedy2014going}, which is converted
-into a caption with a single-layer LSTM (see \citet{vinyals2014show}
-for the details on the architecture).  We test our dropout scheme on  
-LSTM as the convolutional neural network is not trained on the image caption
-dataset because it is not large (MSCOCO \citep{coco}). 
-
-Our results are summarized in the following Table \ref{tab:vis}.  In brief,
-dropout helps relative to not using dropout, but using an ensemble
-eliminates the gains attained by dropout.  Thus, in this setting,
-the main effect of dropout is to produce a single model that is as
-good as an ensemble, which is a reasonable improvement given
-the simplicity of the technique.  
-\begin{table}[t]
+\begin{table}[th]
   \small
   \centering
   \renewcommand{\arraystretch}{1.15}
@@ -687,9 +595,29 @@ the simplicity of the technique.
     10 non-regularized models  & 7.5  &  24.4 \\
     \hline
   \end{tabular}
-  \caption{Results on the MSCOCO dataset. }
+  \caption{Results on the image caption generation task. }
   \label{tab:vis}
 \end{table}
+
+
+
+We applied the dropout variant 
+to the image caption generation model of Vinyals et al.~\cite{vinyals2014show}.  The 
+image caption generation is similar to the sequence-to-sequence model
+of Sutskever et al.~\cite{sutskever2014sequence}, but where the input image is mapped
+onto a vector with a highly-accurate pre-trained convolutional
+neural network \citep{szegedy2014going}, which is converted
+into a caption with a single-layer LSTM (see Vinyals et al.~\cite{vinyals2014show}
+for the details on the architecture).  We test our dropout scheme on  
+LSTM as the convolutional neural network is not trained on the image caption
+dataset because it is not large (MSCOCO \citep{lin2014microsoft}). 
+
+Our results are summarized in the following Table \ref{tab:vis}.  In brief,
+dropout helps relative to not using dropout, but using an ensemble
+eliminates the gains attained by dropout.  Thus, in this setting,
+the main effect of dropout is to produce a single model that is as
+good as an ensemble, which is a reasonable improvement given
+the simplicity of the technique.  
 
 
 
@@ -701,13 +629,11 @@ Our work makes dropout useful for RNNs, and our results suggest that
 our implementation of dropout could improve performance on a wide
 variety of applications.
 
-\section{Acknowledgments}
-
-We wish to acknowledge Tomas Mikolov for useful comments on the first version of the paper.   
 
 \small
 \bibliography{bibliography}
-\bibliographystyle{icml2014}
+\bibliographystyle{unsrt}
 
-\end{document} 
+
+\end{document}
 
